@@ -1,2 +1,2 @@
 # SPListRepository
-SharePoint Repository pattern for convinient list data access
+SharePoint Repository pattern for convenient list data access

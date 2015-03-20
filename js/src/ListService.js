@@ -8,10 +8,11 @@ SPListRepo.ListService =
 		getListByUrl: function (listUrl) {
 		
 			if(listsPool[listUrl]){
-				return $.when(listsPool[listUrl]);
+				return listsPool[listUrl];
 			}
 			
 			var loadDeferred = $.Deferred();
+			listsPool[listUrl] = loadDeferred;
 			
 			var webAbsoluteUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
 			var webServerRelativeUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);

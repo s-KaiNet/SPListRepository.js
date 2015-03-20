@@ -1,4 +1,4 @@
-var SPListRepo = SPListRepo || {};
+Type.registerNamespace("SPListRepo");
 
 SPListRepo.Helpers =
 (function ($) {

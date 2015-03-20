@@ -1,6 +1,11 @@
 module.exports = function (grunt) {
 
-var srcFiles =["src/Helpers.js", "src/RequestError.js", "src/ListService.js"];
+var srcFiles =[
+				"src/Helpers.js", 
+				"src/Constants.js", 
+				"src/RequestError.js", 
+				"src/ListService.js", 
+				"src/Base/ListRepository.js"];
 
 	grunt.initConfig({
 		uglify:{

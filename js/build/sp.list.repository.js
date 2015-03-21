@@ -108,6 +108,31 @@ SPListRepo.ListService =
 		}
 	};
 })(jQuery);
+SPListRepo.BaseListItem =
+(function(){
+	"use strict";
+	
+	function BaseListItem(item) {
+		var e = Function.validateParameters(arguments, [
+			{ name: "item", type: SP.ListItem }
+		], true);
+
+		if (e) throw e;
+
+		this.item = item;
+		this.id = item.get_id();
+		this.created = item.get_item(SPListRepo.Fields.Created);
+		this.createdBy = item.get_item(SPListRepo.Fields.CreatedBy);
+		this.modified = item.get_item(SPListRepo.Fields.Modified);
+		this.modifiedBy = item.get_item(SPListRepo.Fields.ModifiedBy);
+		this.title = item.get_item(SPListRepo.Fields.Title);
+		this.fileDirRef = item.get_item(SPListRepo.Fields.FileDirRef);
+	}
+	
+	return BaseListItem;
+})();
+
+SPListRepo.BaseListItem.registerClass("SPListRepo.BaseListItem");
 SPListRepo.ListRepository = 
 (function($){
 	"use strict";
@@ -160,7 +185,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		getItemsByIds: function(ids) {
@@ -205,19 +230,20 @@ SPListRepo.ListRepository =
 			return this._getItemsByQuery(query);
 		},
 
-		getLastItem: function () {
+		getLastAddedItem: function () {
 			var camlBuilder = new CamlBuilder();
 			var caml = camlBuilder.Where().CounterField(SPListRepo.Fields.ID).NotEqualTo(0).OrderByDesc(SPListRepo.Fields.ID).ToString();
 			var query = new SP.CamlQuery();
+			console.log(query);
 			query.set_viewXml(String.format("<View>" +
 												"<Query>{0}</Query>" +
-												"<RowLimit>1</RowLimit>" +
+												//"<RowLimit>1</RowLimit>" +
 											"</View>", caml));
 
 			return this._getItemByQuery(query);
 		},
 
-		getRootFolders: function () {
+		getFolders: function () {
 			var deferred = this._createDeferred();
 
 			this._loadListDeffered.done(Function.createDelegate(this, function () {
@@ -251,7 +277,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		saveItem: function (model) {
@@ -290,7 +316,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		createFolder: function (folderName) {
@@ -317,7 +343,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		_createDeferred: function () {
@@ -354,7 +380,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		_updateItem: function (model) {
@@ -383,7 +409,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		_setFieldValues: function (item, model) {
@@ -432,7 +458,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		},
 
 		_getItemByQuery: function (camlQuery) {
@@ -469,7 +495,7 @@ SPListRepo.ListRepository =
 				});
 			}));
 
-			return deferred.promise;
+			return deferred.promise();
 		}
 	};
 	

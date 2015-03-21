@@ -23,8 +23,44 @@ SPListRepo.ListRepository =
 	}
 
 	ListRepository.prototype = {
-		getItems: function () {
-			return this._getItemsByQuery(SP.CamlQuery.createAllItemsQuery());
+		getItems: function (viewScope) {
+			var e = Function.validateParameters(arguments, [
+				{ name: "viewScope", type: SPListRepo.ViewScope, optional: true }
+			], true);
+			
+			if (e) throw e;
+			
+			var camlBuilder = new CamlBuilder();
+			switch (viewScope)
+			{
+				case SPListRepo.ViewScope.FilesOnly: 
+					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.FilesOnly);
+					break;
+				case SPListRepo.ViewScope.FoldersOnly: 
+					camlBuilder = camlBuilder.View().Query().Where().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
+					break;
+				case SPListRepo.ViewScope.FilesFolders: 
+					camlBuilder = camlBuilder.View();
+					break;
+				case SPListRepo.ViewScope.FilesOnlyRecursive: 
+					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.Recursive);
+					break;
+				case SPListRepo.ViewScope.FoldersOnlyRecursive: 
+					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll).Query().Where().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
+					break;
+				case SPListRepo.ViewScope.FilesFoldersRecursive: 
+					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll);
+					break;
+				default: 
+					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll);
+					break;
+			}
+			var query = new SP.CamlQuery();
+			query.set_viewXml(String.format("<View Scope=\"{0}\">" +
+												"<Query></Query>" +
+											"</View>", viewScopeString));
+			
+			return this._getItemsByQuery(query);
 		},
 		
 		getItemById: function (id) {

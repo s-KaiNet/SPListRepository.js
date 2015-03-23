@@ -17,6 +17,8 @@ SPListRepo.BaseListItem =
 		this.modifiedBy = item.get_item(SPListRepo.Fields.ModifiedBy);
 		this.title = item.get_item(SPListRepo.Fields.Title);
 		this.fileDirRef = item.get_item(SPListRepo.Fields.FileDirRef);
+		this.fsObjectType = item.get_item(SPListRepo.Fields.FSObjType);
+		this.isFolder = this.fsObjectType === "1";
 	}
 	
 	return BaseListItem;

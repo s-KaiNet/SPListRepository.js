@@ -80,7 +80,7 @@ SPListRepo.ListService =
 			var webAbsoluteUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
 			var webServerRelativeUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
 			var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
-			console.log(url);
+
 			$.ajax({
 				url: url, 
 				type: "GET",
@@ -123,6 +123,27 @@ SPListRepo.ViewScope.prototype = {
 };
 
 SPListRepo.ViewScope.registerEnum("SPListRepo.ViewScope", false);
+SPListRepo.QuerySettings = (function(){
+	"use strict";
+	
+	function QuerySettings(viewScope, viewFields, rowLimit) {
+		var e = Function.validateParameters(arguments, [
+				{ name: "viewScope", type: SPListRepo.ViewScope, optional: true },
+				{ name: "viewFields", type: Array, elementType: String, optional: true },
+				{ name: "rowLimit", type: Number, optional: true }
+			], true);
+			
+			if (e) throw e;
+			
+			this.viewScope = viewScope;
+			this.viewFields = viewFields;
+			this.rowLimit = rowLimit;
+	}
+	
+	return QuerySettings;
+})();
+
+SPListRepo.QuerySettings.registerClass("SPListRepo.QuerySettings");
 SPListRepo.BaseListItem =
 (function(){
 	"use strict";
@@ -142,6 +163,8 @@ SPListRepo.BaseListItem =
 		this.modifiedBy = item.get_item(SPListRepo.Fields.ModifiedBy);
 		this.title = item.get_item(SPListRepo.Fields.Title);
 		this.fileDirRef = item.get_item(SPListRepo.Fields.FileDirRef);
+		this.fsObjectType = item.get_item(SPListRepo.Fields.FSObjType);
+		this.isFolder = this.fsObjectType === "1";
 	}
 	
 	return BaseListItem;
@@ -173,44 +196,14 @@ SPListRepo.ListRepository =
 	}
 
 	ListRepository.prototype = {
-		getItems: function (viewScope) {
+		getItems: function (querySettings) {
 			var e = Function.validateParameters(arguments, [
-				{ name: "viewScope", type: SPListRepo.ViewScope, optional: true }
+				{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
 			], true);
 			
 			if (e) throw e;
 			
-			var camlBuilder = new CamlBuilder();
-			switch (viewScope)
-			{
-				case SPListRepo.ViewScope.FilesOnly: 
-					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.FilesOnly);
-					break;
-				case SPListRepo.ViewScope.FoldersOnly: 
-					camlBuilder = camlBuilder.View().Query().Where().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
-					break;
-				case SPListRepo.ViewScope.FilesFolders: 
-					camlBuilder = camlBuilder.View();
-					break;
-				case SPListRepo.ViewScope.FilesOnlyRecursive: 
-					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.Recursive);
-					break;
-				case SPListRepo.ViewScope.FoldersOnlyRecursive: 
-					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll).Query().Where().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
-					break;
-				case SPListRepo.ViewScope.FilesFoldersRecursive: 
-					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll);
-					break;
-				default: 
-					camlBuilder = camlBuilder.View().Scope(CamlBuilder.ViewScope.RecursiveAll);
-					break;
-			}
-			var query = new SP.CamlQuery();
-			query.set_viewXml(String.format("<View Scope=\"{0}\">" +
-												"<Query></Query>" +
-											"</View>", viewScopeString));
-			
-			return this._getItemsByQuery(query);
+			return this._getItemsByQuery(null, querySettings);
 		},
 		
 		getItemById: function (id) {
@@ -239,96 +232,54 @@ SPListRepo.ListRepository =
 			return deferred.promise();
 		},
 
-		getItemsByIds: function(ids) {
+		getItemsByIds: function(ids, querySettings) {
 			var e = Function.validateParameters(arguments, [
-					{ name: "ids", type: Array, elementType: Number }
+					{ name: "ids", type: Array, elementType: Number },
+					{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
 			]);
 
 			if (e) throw e;
 
-			var camlBuilder = new CamlBuilder();
-			var caml = camlBuilder.Where().CounterField(SPListRepo.Fields.ID).In(ids).ToString();
-			var query = new SP.CamlQuery();
-			query.set_viewXml(String.format("<View>" +
-												"<Query>{0}</Query>" +
-											"</View>", caml));
+			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).In(ids);
 
-			return this._getItemsByQuery(query);
+			return this._getItemsByQuery(camlExpression, querySettings);
 		},
 
-		getItemsInsideFolders: function(folderNames) {
+		getItemsInsideFolders: function(folderNames, querySettings) {
 			var e = Function.validateParameters(arguments, [
-					{ name: "folderNames", type: Array, elementType: String }
+					{ name: "folderNames", type: Array, elementType: String },
+					{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
 			]);
 
 			if (e) throw e;
 
 			var self = this;
-			var camlBuilder = new CamlBuilder();
-			var caml = camlBuilder.Where().TextField(SPListRepo.Fields.FileDirRef).In(folderNames.map(function(folderName) {
+			
+			var camlExpression = CamlBuilder.Expression().TextField(SPListRepo.Fields.FileDirRef).In(folderNames.map(function(folderName) {
 				var folderRelUrl = self._getFolderRelativeUrl(folderName);
 				if (folderRelUrl.startsWith("/")) {
 					folderRelUrl = folderRelUrl.substring(1);
 				}
 
 				return folderRelUrl;
-			})).ToString();
-			var query = new SP.CamlQuery();
-			query.set_viewXml(String.format("<View Scope=\"RecursiveAll\">" +
-												"<Query>{0}</Query>" +
-											"</View>", caml));
-
-			return this._getItemsByQuery(query);
-		},
-
-		getLastAddedItem: function () {
-			var camlBuilder = new CamlBuilder();
-			var caml = camlBuilder.Where().CounterField(SPListRepo.Fields.ID).NotEqualTo(0).OrderByDesc(SPListRepo.Fields.ID).ToString();
-			var query = new SP.CamlQuery();
-			console.log(query);
-			query.set_viewXml(String.format("<View>" +
-												"<Query>{0}</Query>" +
-												//"<RowLimit>1</RowLimit>" +
-											"</View>", caml));
-
-			return this._getItemByQuery(query);
-		},
-
-		getFolders: function () {
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
-
-				var camlBuilder = new CamlBuilder();
-				var caml = camlBuilder.Where()
-					.IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1).ToString();
-				var camlQuery = new SP.CamlQuery();
-				camlQuery.set_viewXml(String.format("<View>" +
-													"<Query>{0}</Query>" +
-												"</View>", caml));
-
-				var items = this._list.getItems(camlQuery);
-				var self = this;
-				this._context.load(items);
-				this._context.executeQueryAsync(function () {
-					var folders = [];
-					var itemsEnumerator = items.getEnumerator();
-					while (itemsEnumerator.moveNext()) {
-						var item = itemsEnumerator.get_current();
-
-						//FIX for Item folder - default, can't figure out how to prevent its creation
-						if (item.get_item(SPListRepo.Fields.Title) === "Item") continue;
-
-						folders.push(new self._listItemConstructor(item));
-					}
-
-					deferred.resolve(folders);
-				}, function (sender, error) {
-					deferred.reject(new RequestError(error));
-				});
 			}));
 
-			return deferred.promise();
+			return this._getItemsByQuery(camlExpression, querySettings);
+		},
+
+		getLastAddedItem: function (querySettings) {
+			var e = Function.validateParameters(arguments, [
+					{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
+			]);
+
+			if (e) throw e;
+			
+			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0).OrderByDesc(SPListRepo.Fields.ID);
+			
+			querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
+			querySettings.rowLimit = 1;
+
+			return this._getItemByQuery(camlExpression, querySettings);
 		},
 
 		saveItem: function (model) {
@@ -477,15 +428,13 @@ SPListRepo.ListRepository =
 			return String.format("{0}{1}/{2}", webRelativeUrl, this._listUrl, folder);
 		},
 
-		_getItemsByQuery: function (camlQuery) {
-			var e = Function.validateParameters(arguments, [
-				{ name: "camlQuery", type: SP.CamlQuery }
-			], true);
-
-			if (e) throw e;
+		_getItemsByQuery: function (camlExpression, querySettings) {
 
 			var deferred = this._createDeferred();
-
+			querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
+			
+			var camlQuery = this._getViewQuery(camlExpression, querySettings.viewScope, querySettings.viewFields, querySettings.rowLimit);
+			
 			this._loadListDeffered.done(Function.createDelegate(this, function () {
 				if (this.folder) {
 					camlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
@@ -512,41 +461,73 @@ SPListRepo.ListRepository =
 			return deferred.promise();
 		},
 
-		_getItemByQuery: function (camlQuery) {
-			var e = Function.validateParameters(arguments, [
-				{ name: "camlQuery", type: SP.CamlQuery }
-			], true);
-
-			if (e) throw e;
+		_getItemByQuery: function (camlExpression, querySettings) {
 
 			var deferred = this._createDeferred();
 
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
-				if (this.folder) {
-					camlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
-				}
-				var items = this._list.getItems(camlQuery);
-				this._context.load(items);
+			this._getItemsByQuery(camlExpression, querySettings)
+			.done(function(items){
+				if (items.length > 1) throw "Result contains more than one element";
 
-				var self = this;
-
-				this._context.executeQueryAsync(function () {
-					var itemsEnumerator = items.getEnumerator();
-					var resultItemList = [];
-
-					while (itemsEnumerator.moveNext()) {
-						resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));
-					}
-					if (resultItemList.length > 1) throw "Result contains more than one element";
-
-					deferred.resolve(resultItemList.length === 1 ? resultItemList[0] : null);
-
-				}, function (sender, args) {
-					deferred.reject(new RequestError(args));
-				});
-			}));
-
+				deferred.resolve(items.length === 1 ? items[0] : null);
+			})
+			.fail(function(err){
+				deferred.reject(err);
+			});
+			
 			return deferred.promise();
+		},
+		
+		_getViewQuery: function(camlExpression, viewScope, viewFields, rowLimit){
+
+			var deferred = this._createDeferred();
+			var camlQuery;
+			var viewQuery = new CamlBuilder().View(viewFields);
+			
+			if(rowLimit){
+				viewQuery = viewQuery.RowLimit(rowLimit);
+			}
+			var foldersOnlyExpression = CamlBuilder.Expression().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
+			switch (viewScope)
+			{
+				case SPListRepo.ViewScope.FilesOnly: 
+					viewQuery = viewQuery.Scope(CamlBuilder.ViewScope.FilesOnly);
+					break;
+				case SPListRepo.ViewScope.FoldersOnly: 
+				case SPListRepo.ViewScope.FilesFolders: 
+					break;
+				case SPListRepo.ViewScope.FilesOnlyRecursive: 
+					viewQuery = viewQuery.Scope(CamlBuilder.ViewScope.Recursive);
+					break;
+				case SPListRepo.ViewScope.FoldersOnlyRecursive: 
+				case SPListRepo.ViewScope.FilesFoldersRecursive: 
+					viewQuery = viewQuery.Scope(CamlBuilder.ViewScope.RecursiveAll);
+					break;
+				default: 
+					viewQuery = viewQuery.Scope(CamlBuilder.ViewScope.RecursiveAll);
+					break;
+			}
+			
+			if(viewScope === SPListRepo.ViewScope.FoldersOnly || viewScope === SPListRepo.ViewScope.FoldersOnlyRecursive){
+				if(camlExpression){
+					camlQuery = viewQuery.Query().Where().All(camlExpression, foldersOnlyExpression).ToString();
+				} else {
+					camlQuery = viewQuery.Query().Where().All(foldersOnlyExpression).ToString();
+				}
+			}
+			else{
+				if(camlExpression){
+					camlQuery = viewQuery.Query().Where().All(camlExpression).ToString();
+				} else {
+					camlQuery = viewQuery.Query().Where().All().ToString();
+				}
+			}			
+			
+			console.log(camlQuery);
+			var query = new SP.CamlQuery();
+			query.set_viewXml(camlQuery);
+			
+			return query;
 		}
 	};
 	

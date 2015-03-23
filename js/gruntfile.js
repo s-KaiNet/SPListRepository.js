@@ -6,6 +6,7 @@ var srcFiles =[
 				"src/RequestError.js", 
 				"src/ListService.js",
 				"src/ViewScope.js",
+				"src/QuerySettings.js",
 				"src/Base/BaseListItem.js",
 				"src/Base/ListRepository.js"];
 

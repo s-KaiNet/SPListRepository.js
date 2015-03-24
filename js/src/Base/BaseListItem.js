@@ -11,14 +11,23 @@ SPListRepo.BaseListItem =
 
 		this.item = item;
 		this.id = item.get_id();
-		this.created = item.get_item(SPListRepo.Fields.Created);
-		this.createdBy = item.get_item(SPListRepo.Fields.CreatedBy);
-		this.modified = item.get_item(SPListRepo.Fields.Modified);
-		this.modifiedBy = item.get_item(SPListRepo.Fields.ModifiedBy);
-		this.title = item.get_item(SPListRepo.Fields.Title);
-		this.fileDirRef = item.get_item(SPListRepo.Fields.FileDirRef);
-		this.fsObjectType = item.get_item(SPListRepo.Fields.FSObjType);
-		this.isFolder = this.fsObjectType === "1";
+		this.created = this.getFieldValue(SPListRepo.Fields.Created);
+		this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);
+		this.modified = this.getFieldValue(SPListRepo.Fields.Modified);
+		this.modifiedBy = this.getFieldValue(SPListRepo.Fields.ModifiedBy);
+		this.title = this.getFieldValue(SPListRepo.Fields.Title);
+		this.fileDirRef = this.getFieldValue(SPListRepo.Fields.FileDirRef);
+		this.fileSystemObjectType = this.item.get_fileSystemObjectType();
+	}
+	
+	BaseListItem.prototype.getFieldValue = function(name){
+		var value = this.item.get_fieldValues()[name];
+		
+		if(typeof value !== "undefined"){
+			return this.item.get_item(name);
+		}
+		
+		return undefined;
 	}
 	
 	return BaseListItem;

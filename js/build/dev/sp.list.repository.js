@@ -20,6 +20,18 @@ SPListRepo.Helpers =
 		}
 	};
 })(jQuery);
+(function(){"use strict";window.SPListRepo.isDebug = 1; })();
+SPListRepo.Logger =
+(function (window) {
+	"use strict";
+	return {
+		log: function(data){
+			if(window.SPListRepo.isDebug){
+				console.log(data);
+			}
+		}
+	};
+})(window);
 Type.registerNamespace("SPListRepo.Fields");
 Type.registerNamespace("SPListRepo.ErrorCodes");
 
@@ -157,14 +169,23 @@ SPListRepo.BaseListItem =
 
 		this.item = item;
 		this.id = item.get_id();
-		this.created = item.get_item(SPListRepo.Fields.Created);
-		this.createdBy = item.get_item(SPListRepo.Fields.CreatedBy);
-		this.modified = item.get_item(SPListRepo.Fields.Modified);
-		this.modifiedBy = item.get_item(SPListRepo.Fields.ModifiedBy);
-		this.title = item.get_item(SPListRepo.Fields.Title);
-		this.fileDirRef = item.get_item(SPListRepo.Fields.FileDirRef);
-		this.fsObjectType = item.get_item(SPListRepo.Fields.FSObjType);
-		this.isFolder = this.fsObjectType === "1";
+		this.created = this.getFieldValue(SPListRepo.Fields.Created);
+		this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);
+		this.modified = this.getFieldValue(SPListRepo.Fields.Modified);
+		this.modifiedBy = this.getFieldValue(SPListRepo.Fields.ModifiedBy);
+		this.title = this.getFieldValue(SPListRepo.Fields.Title);
+		this.fileDirRef = this.getFieldValue(SPListRepo.Fields.FileDirRef);
+		this.fileSystemObjectType = this.item.get_fileSystemObjectType();
+	}
+	
+	BaseListItem.prototype.getFieldValue = function(name){
+		var value = this.item.get_fieldValues()[name];
+		
+		if(typeof value !== "undefined"){
+			return this.item.get_item(name);
+		}
+		
+		return undefined;
 	}
 	
 	return BaseListItem;
@@ -203,7 +224,7 @@ SPListRepo.ListRepository =
 			
 			if (e) throw e;
 			
-			return this._getItemsByQuery(null, querySettings);
+			return this._getItemsByExpression(null, querySettings);
 		},
 		
 		getItemById: function (id) {
@@ -225,7 +246,7 @@ SPListRepo.ListRepository =
 					var resultItem = new self._listItemConstructor(item);
 					deferred.resolve(resultItem);
 				}, function (sender, error) {
-					deferred.reject(new RequestError(error));
+					deferred.reject(new SPListRepo.RequestError(error));
 				});
 			}));
 
@@ -242,7 +263,7 @@ SPListRepo.ListRepository =
 
 			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).In(ids);
 
-			return this._getItemsByQuery(camlExpression, querySettings);
+			return this._getItemsByExpression(camlExpression, querySettings);
 		},
 
 		getItemsInsideFolders: function(folderNames, querySettings) {
@@ -264,7 +285,7 @@ SPListRepo.ListRepository =
 				return folderRelUrl;
 			}));
 
-			return this._getItemsByQuery(camlExpression, querySettings);
+			return this._getItemsByExpression(camlExpression, querySettings);
 		},
 
 		getLastAddedItem: function (querySettings) {
@@ -274,12 +295,14 @@ SPListRepo.ListRepository =
 
 			if (e) throw e;
 			
-			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0).OrderByDesc(SPListRepo.Fields.ID);
+			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0);			
 			
 			querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
 			querySettings.rowLimit = 1;
+			
+			var query = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings).OrderByDesc(SPListRepo.Fields.ID));
 
-			return this._getItemByQuery(camlExpression, querySettings);
+			return this._getItemsBySPCamlQuery(query);
 		},
 
 		saveItem: function (model) {
@@ -314,7 +337,7 @@ SPListRepo.ListRepository =
 				this._context.executeQueryAsync(function () {
 					deferred.resolve();
 				}, function (sender, error) {
-					deferred.reject(new RequestError(error));
+					deferred.reject(new SPListRepo.RequestError(error));
 				});
 			}));
 
@@ -341,7 +364,7 @@ SPListRepo.ListRepository =
 				this._context.executeQueryAsync(function () {
 					deferred.resolve(folderItem);
 				}, function (sender, error) {
-					deferred.reject(new RequestError(error));
+					deferred.reject(new SPListRepo.RequestError(error));
 				});
 			}));
 
@@ -378,7 +401,7 @@ SPListRepo.ListRepository =
 					var resultItem = new self._listItemConstructor(newItem);
 					deferred.resolve(resultItem);
 				}, function (sender, error) {
-					deferred.reject(new RequestError(error));
+					deferred.reject(new SPListRepo.RequestError(error)); 
 				});
 			}));
 
@@ -407,7 +430,7 @@ SPListRepo.ListRepository =
 					var resultItem = new self._listItemConstructor(item);
 					deferred.resolve(resultItem);
 				}, function (sender, args) {
-					deferred.reject(new RequestError(args));
+					deferred.reject(new SPListRepo.RequestError(args));
 				});
 			}));
 
@@ -428,18 +451,25 @@ SPListRepo.ListRepository =
 			return String.format("{0}{1}/{2}", webRelativeUrl, this._listUrl, folder);
 		},
 
-		_getItemsByQuery: function (camlExpression, querySettings) {
+		//NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
+		_getItemsByExpression: function (camlExpression, querySettings) {
 
 			var deferred = this._createDeferred();
 			querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
 			
-			var camlQuery = this._getViewQuery(camlExpression, querySettings.viewScope, querySettings.viewFields, querySettings.rowLimit);
+			var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));
 			
+			return this._getItemsBySPCamlQuery(camlQuery);
+		},
+		
+		_getItemsBySPCamlQuery: function(spCamlQuery) {
+			
+			var deferred = this._createDeferred();
 			this._loadListDeffered.done(Function.createDelegate(this, function () {
 				if (this.folder) {
-					camlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
+					spCamlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
 				}
-				var items = this._list.getItems(camlQuery);
+				var items = this._list.getItems(spCamlQuery);
 				this._context.load(items);
 
 				var self = this;
@@ -451,25 +481,29 @@ SPListRepo.ListRepository =
 					while (itemsEnumerator.moveNext()) {
 						resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));
 					}
+					
+					SPListRepo.Logger.log(String.format("Getting results ({0}):", resultItemList.length));
+					SPListRepo.Logger.log(resultItemList);
 					deferred.resolve(resultItemList);
 
 				}, function (sender, args) {
-					deferred.reject(new RequestError(args));
+					deferred.reject(new SPListRepo.RequestError(args));
 				});
 			}));
 
 			return deferred.promise();
 		},
 
-		_getItemByQuery: function (camlExpression, querySettings) {
+		_getItemByExpression: function (camlExpression, querySettings) {
 
 			var deferred = this._createDeferred();
 
-			this._getItemsByQuery(camlExpression, querySettings)
+			this._getItemsByExpression(camlExpression, querySettings)
 			.done(function(items){
 				if (items.length > 1) throw "Result contains more than one element";
-
+				
 				deferred.resolve(items.length === 1 ? items[0] : null);
+
 			})
 			.fail(function(err){
 				deferred.reject(err);
@@ -478,17 +512,17 @@ SPListRepo.ListRepository =
 			return deferred.promise();
 		},
 		
-		_getViewQuery: function(camlExpression, viewScope, viewFields, rowLimit){
+		_getViewQuery: function(camlExpression, querySettings){
 
 			var deferred = this._createDeferred();
 			var camlQuery;
-			var viewQuery = new CamlBuilder().View(viewFields);
+			var viewQuery = new CamlBuilder().View(querySettings.viewFields);
 			
-			if(rowLimit){
-				viewQuery = viewQuery.RowLimit(rowLimit);
+			if(querySettings.rowLimit){
+				viewQuery = viewQuery.RowLimit(querySettings.rowLimit);
 			}
 			var foldersOnlyExpression = CamlBuilder.Expression().IntegerField(SPListRepo.Fields.FSObjType).EqualTo(1);
-			switch (viewScope)
+			switch (querySettings.viewScope)
 			{
 				case SPListRepo.ViewScope.FilesOnly: 
 					viewQuery = viewQuery.Scope(CamlBuilder.ViewScope.FilesOnly);
@@ -508,25 +542,30 @@ SPListRepo.ListRepository =
 					break;
 			}
 			
-			if(viewScope === SPListRepo.ViewScope.FoldersOnly || viewScope === SPListRepo.ViewScope.FoldersOnlyRecursive){
+			if(querySettings.viewScope === SPListRepo.ViewScope.FoldersOnly || querySettings.viewScope === SPListRepo.ViewScope.FoldersOnlyRecursive){
 				if(camlExpression){
-					camlQuery = viewQuery.Query().Where().All(camlExpression, foldersOnlyExpression).ToString();
+					camlQuery = viewQuery.Query().Where().All(camlExpression, foldersOnlyExpression);
 				} else {
-					camlQuery = viewQuery.Query().Where().All(foldersOnlyExpression).ToString();
+					camlQuery = viewQuery.Query().Where().All(foldersOnlyExpression);
 				}
 			}
 			else{
 				if(camlExpression){
-					camlQuery = viewQuery.Query().Where().All(camlExpression).ToString();
+					camlQuery = viewQuery.Query().Where().All(camlExpression);
 				} else {
-					camlQuery = viewQuery.Query().Where().All().ToString();
+					camlQuery = viewQuery.Query().Where().All();
 				}
 			}			
-			
-			console.log(camlQuery);
+				
+			return camlQuery;
+		},
+		
+		_getSPCamlQuery: function(viewXmlObject){
+			var viewQuery = viewXmlObject.ToString();
+			SPListRepo.Logger.log("Running query:");
+			SPListRepo.Logger.log(viewQuery);
 			var query = new SP.CamlQuery();
-			query.set_viewXml(camlQuery);
-			
+			query.set_viewXml(viewQuery);			
 			return query;
 		}
 	};

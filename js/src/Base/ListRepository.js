@@ -110,7 +110,24 @@ SPListRepo.ListRepository =
 
 			return this._getItemsBySPCamlQuery(query);
 		},
+		
+		getLastModifiedItem(querySettings){
+			var e = Function.validateParameters(arguments, [
+					{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
+			]);
 
+			if (e) throw e;
+			
+			var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0);			
+			
+			querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
+			querySettings.rowLimit = 1;
+			
+			var query = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings).OrderByDesc(SPListRepo.Fields.Modified));
+
+			return this._getItemsBySPCamlQuery(query);
+		},
+		
 		saveItem: function (model) {
 			var e = Function.validateParameters(arguments, [
 				{ name: "model", type: this._listItemConstructor }

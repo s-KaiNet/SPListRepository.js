@@ -1,1 +1,1 @@
-(function(){"use strict";window.SPListRepo.isDebug = 1; })();
+(function(){"use strict";window.SPListRepo.isDebug = 0; })();

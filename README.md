@@ -1,5 +1,5 @@
 # SPListRepository.js
-SharePoint Repository pattern implementation for convenient list data access thought the SharePoint JavaScript client object model.  
+Repository pattern implementation for convenient list data access thought the SharePoint JavaScript client object model.  
 
 Main file is `js\build\release\sp.list.repository.min.js `
 
@@ -22,15 +22,15 @@ Contains scope values related to SP CAML query operations. All operations by def
 
  - `FilesOnly` - Shows only files(items) in the specified folder 
  - `FoldersOnly` - Shows only folders in the specified folder 
- - `FilesFolders` - Shows all files(items) AND subfolders of the specified folder.
+ - `FilesFolders` - Shows all files(items) AND folders of the specified folder.
  - `FilesOnlyRecursive` - Shows only files(items) in the specified folder or any folder descending from it
  - `FoldersOnlyRecursive` - Shows only folders in the specified folder or any folder descending from it
  - `FilesFoldersRecursive` - Shows all files(items) AND folders in the specified folder or any folder descending from it 
 
 ####`SPListRepo.QuerySettings` class: 
-###### Constructor: QuerySettings(viewScope, viewFields, rowLimit):
+###### Constructor: `QuerySettings(viewScope, viewFields, rowLimit)`:
  - `viewScope` - optional, `SPListRepo.ViewScope` enumeration value, default is `FilesFolders`
- - `viewFields` - optional, string array of fields to query
+ - `viewFields` - optional, string array of field names to include in SPQuery, corresponds to `ViewFields` SPQuery element
  - `rowLimit` - optional, RowLimit SPQuery parameter
 
 #### `SPListRepo.ListRepository` class:
@@ -40,49 +40,49 @@ Contains scope values related to SP CAML query operations. All operations by def
 
 ######Property: `folder`
 When folder property is instantiated, then all CAML query-related operation on list will be relateive to this folder. For subfolders use `RootFolderName/SubFolderName`. Corresponds to `folderServerRelativeUrl` property on `SP.CamlQuery` object. 
-######Method: getItems(querySettings)
+######Method: `getItems(querySettings)`
 Returns all items using specified query settings. 
 
 - `querySettings` - optional, `SPListRepo.QuerySettings` object
 
-######Method: getItemById(id)
+######Method: `getItemById(id)`
 Returns item by its Id. 
 
 - `id` - required number, Id of the item
 
-######Method: getItemsByIds: function(ids, querySettings) 
+######Method: `getItemsByIds(ids, querySettings) `
 Returns items by its their Ids.  
 
 
 - `ids` - required, array of items' Ids  
 - `querySettings` - optional, `SPListRepo.QuerySettings` object  
 
-######Method: getItemsInsideFolders: function(folderNames, querySettings)
+######Method: `getItemsInsideFolders(folderNames, querySettings)`
 Returns items inside specified folders.
 - `folderNames` - required, string array of folder names, for sub folders use `RootFolderName/Subfolder`
 - `querySettings` - optional, `SPListRepo.QuerySettings` object  
 
-######Method: getLastAddedItem: function (querySettings)
+######Method: `getLastAddedItem(querySettings)`
 Returns last added item. Depending on `querySettings` and `folder` property may return item from the entire list or from the specified folder.  
 
 - `querySettings` - optional, `SPListRepo.QuerySettings` object  
 
-######Method: getLastModifiedItem: function(querySettings)
+######Method: `getLastModifiedItem(querySettings)`
 Returns last modified item. Depending on querySettings and folder property may return item from the entire list or from the specified folder.  
 
 - `querySettings` - optional, `SPListRepo.QuerySettings` object 
 
-######Method: saveItem: function (model)
+######Method: `saveItem(model)`
 Saves item in SharePoint. If model.id is specified item will be updated, otherwise item will be added.  
 
  - `model` - required, object that was created using `listItemConstructor` constructor function that you specified for list repository constructor  
  
-######Method: deleteItem: function (model)  
+######Method: `deleteItem(model) ` 
 Deletes item. 
 
  - `model` - required, object that was created using `listItemConstructor` constructor function that you specified for list repository constructor   
 
-######Method: createFolder: function (folderName)
+######Method: `createFolder(folderName)`
 Creates folder.  
 
  - `folderName` - required, string name. For sub folder use `RootFolderName/SubFolder` (`RootFolderName` should exists)

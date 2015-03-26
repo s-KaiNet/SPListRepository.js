@@ -17,7 +17,7 @@ Currently project has following dependencies:
 
 Base classes include: 
 
-####`SPListRepo.ViewScope` enumeration:
+###`SPListRepo.ViewScope` enumeration:
 Contains scope values related to SP CAML query operations. All operations by default will be limited to one of this scopes:  
 
  - `FilesOnly` - Shows only files(items) in the specified folder 
@@ -27,13 +27,13 @@ Contains scope values related to SP CAML query operations. All operations by def
  - `FoldersOnlyRecursive` - Shows only folders in the specified folder or any folder descending from it
  - `FilesFoldersRecursive` - Shows all files(items) AND folders in the specified folder or any folder descending from it 
 
-####`SPListRepo.QuerySettings` class: 
+###`SPListRepo.QuerySettings` class: 
 ##### Constructor: `QuerySettings(viewScope, viewFields, rowLimit)`:
  - `viewScope` - optional, `SPListRepo.ViewScope` enumeration value, default is `FilesFolders`
  - `viewFields` - optional, string array of field names to include in SPQuery, corresponds to `ViewFields` SPQuery element
  - `rowLimit` - optional, RowLimit SPQuery parameter
 
-#### `SPListRepo.ListRepository` class:
+### `SPListRepo.ListRepository` class:
 #####Constructor: `ListRepository(listUrl, listItemConstructor)`
 - `listUrl` - required, list relative url, for example `Lists/News`
 - `listItemConstructor` - required, constructor function for item object  
@@ -51,7 +51,7 @@ Returns item by its Id.
 - `id` - required number, Id of the item
 
 #####Method: `getItemsByIds(ids, querySettings) `
-Returns items by its their Ids.  
+Returns items by their Ids.  
 
 
 - `ids` - required, array of items' Ids  
@@ -106,7 +106,7 @@ List structure:
 
 You need to query top 5 news for March, 2015 using `SPListRepository.js.`  
 
-1. Create class that will represent your news item and inherit it from `SPListRepo.BaseListItem`:   
+1) Create class that will represent your news item and inherit it from `SPListRepo.BaseListItem`:   
 
 ```javascript
 var MyApp = MyApp || {};
@@ -151,7 +151,7 @@ MyApp.NewsListItem.registerClass("MyApp.NewsListItem", SPListRepo.BaseListItem);
 
 Register class and inherit it from the base `SPListRepo.BaseListItem`  
 
- 2. Create NewsRepository inherited from `SPListRepo.ListRepository`. Add required methods to your repository.   
+ 2) Create NewsRepository inherited from `SPListRepo.ListRepository`. Add required methods to your repository.   
 
 
 ```javascript

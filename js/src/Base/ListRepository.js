@@ -111,7 +111,7 @@ SPListRepo.ListRepository =
 			return this._getItemsBySPCamlQuery(query);
 		},
 		
-		getLastModifiedItem(querySettings){
+		getLastModifiedItem: function(querySettings) {
 			var e = Function.validateParameters(arguments, [
 					{ name: "querySettings", type: SPListRepo.QuerySettings, optional: true }
 			]);

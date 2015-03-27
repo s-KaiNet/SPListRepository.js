@@ -14,8 +14,8 @@ SPListRepo.ListRepository =
 		this._listItemConstructor = listItemConstructor;
 
 		this._context = SP.ClientContext.get_current();
-		this._loadListDeffered = SPListRepo.ListService.getListByUrl(this._listUrl);
-		this._loadListDeffered.done(Function.createDelegate(this, function (list) {
+		this._loadListDeferred = SPListRepo.ListService.getListByUrl(this._listUrl);
+		this._loadListDeferred.done(Function.createDelegate(this, function (list) {
 			this._list = list;
 		}));
 
@@ -40,9 +40,8 @@ SPListRepo.ListRepository =
 
 			if (e) throw e;
 
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
+			return this._withPromise(function(deferred) {
+				
 				var item = this._list.getItemById(id);
 				this._context.load(item);
 
@@ -54,9 +53,7 @@ SPListRepo.ListRepository =
 				}, function (sender, error) {
 					deferred.reject(new SPListRepo.RequestError(error));
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
 
 		getItemsByIds: function(ids, querySettings) {
@@ -149,9 +146,8 @@ SPListRepo.ListRepository =
 
 			if (e) throw e;
 
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
+			return this._withPromise(function(deferred) {
+				
 				var item = this._list.getItemById(model.id);
 				this._context.load(item);
 
@@ -162,9 +158,7 @@ SPListRepo.ListRepository =
 				}, function (sender, error) {
 					deferred.reject(new SPListRepo.RequestError(error));
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
 
 		createFolder: function (folderName) {
@@ -173,10 +167,9 @@ SPListRepo.ListRepository =
 			], true);
 
 			if (e) throw e;
-
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
+			
+			return this._withPromise(function(deferred) {
+				
 				var folder = new SP.ListItemCreationInformation();
 				folder.set_underlyingObjectType(SP.FileSystemObjectType.folder);
 				folder.set_leafName(folderName);
@@ -189,26 +182,66 @@ SPListRepo.ListRepository =
 				}, function (sender, error) {
 					deferred.reject(new SPListRepo.RequestError(error));
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
+		
+		createFile: function(url, content, overwrite){
+			var e = Function.validateParameters(arguments, [
+				{ name: "url", type: String },
+				{ name: "content", type: String },
+				{ name: "overwrite", type: Boolean }
+			], true);
 
+			if (e) throw e;			
+			
+			return this._withPromise(function(deferred){
+				
+				var fileCreateInfo = new SP.FileCreationInformation();
+				
+				fileCreateInfo.set_url(url);
+				fileCreateInfo.set_overwrite(overwrite);
+				fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
+
+				for (var i = 0; i < content.length; i++) {
+
+					fileCreateInfo.get_content().append(content.charCodeAt(i));
+				}
+				
+				var newFile = this._context.get_web().getFolderByServerRelativeUrl(this._getFolderRelativeUrl()).get_files().add(fileCreateInfo);
+				this._context.load(newFile);
+				
+				this._context.executeQueryAsync(function () {
+					deferred.resolve(newFile);
+				}, function (sender, error) {
+					deferred.reject(new SPListRepo.RequestError(error));
+				});
+			});
+		},
+		
 		_createDeferred: function () {
 			return $.Deferred();
 		},
-
+		
+		_withPromise: function(callback){
+			var deferred = this._createDeferred();
+			var self = this;
+			this._loadListDeferred.done(Function.createDelegate(this, function () {				
+				callback.apply(this, [deferred]);
+			}));				
+			
+			return deferred.promise();
+		},
+		
 		_addItem: function (model) {
 			var e = Function.validateParameters(arguments, [
 				{ name: "model", type: this._listItemConstructor }
 			], true);
 
 			if (e) throw e;
-
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
-				var itemCreateInfo = new SP.ListItemCreationInformation();
+			
+			return this._withPromise(function(deferred) {
+			
+			var itemCreateInfo = new SP.ListItemCreationInformation();
 				if (this.folder) {
 					itemCreateInfo.set_folderUrl(this._getFolderRelativeUrl());
 				}
@@ -226,9 +259,7 @@ SPListRepo.ListRepository =
 				}, function (sender, error) {
 					deferred.reject(new SPListRepo.RequestError(error)); 
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
 
 		_updateItem: function (model) {
@@ -237,10 +268,9 @@ SPListRepo.ListRepository =
 			], true);
 
 			if (e) throw e;
-
-			var deferred = this._createDeferred();
-
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
+			
+			return this._withPromise(function(deferred) {
+				
 				var item = this._list.getItemById(model.id);
 				this._context.load(item);
 
@@ -255,9 +285,7 @@ SPListRepo.ListRepository =
 				}, function (sender, args) {
 					deferred.reject(new SPListRepo.RequestError(args));
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
 
 		_setFieldValues: function (item, model) {
@@ -285,10 +313,9 @@ SPListRepo.ListRepository =
 			return this._getItemsBySPCamlQuery(camlQuery);
 		},
 		
-		_getItemsBySPCamlQuery: function(spCamlQuery) {
-			
-			var deferred = this._createDeferred();
-			this._loadListDeffered.done(Function.createDelegate(this, function () {
+		_getItemsBySPCamlQuery: function(spCamlQuery) {			
+			return this._withPromise(function(deferred) {
+				
 				if (this.folder) {
 					spCamlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
 				}
@@ -312,9 +339,7 @@ SPListRepo.ListRepository =
 				}, function (sender, args) {
 					deferred.reject(new SPListRepo.RequestError(args));
 				});
-			}));
-
-			return deferred.promise();
+			});
 		},
 
 		_getItemByExpression: function (camlExpression, querySettings) {
@@ -326,7 +351,6 @@ SPListRepo.ListRepository =
 				if (items.length > 1) throw "Result contains more than one element";
 				
 				deferred.resolve(items.length === 1 ? items[0] : null);
-
 			})
 			.fail(function(err){
 				deferred.reject(err);

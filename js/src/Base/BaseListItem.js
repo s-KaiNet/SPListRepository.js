@@ -11,6 +11,7 @@ SPListRepo.BaseListItem =
 
 		if(item) {
 			this.item = item;
+			this.file = this.item.file;
 			this.id = item.get_id();
 			this.created = this.getFieldValue(SPListRepo.Fields.Created);
 			this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);

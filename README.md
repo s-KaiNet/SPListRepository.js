@@ -87,6 +87,12 @@ Creates folder.
 
  - `folderName` - required, string name. For sub folder use `RootFolderName/SubFolder` (`RootFolderName` should exists)
 
+#####Method: `createFile(url, content, overwrite)`
+Creates file. If you want to save a file inside folder, you should provide `folder` property for list repository object (for example `folder = "MyFolder"`), otherwise it will be saved in a root folder of the list.  
+
+- `url` - required, file url. Urls as `my/file.txt` are not allowed. Valid urls are actually file names, i.e. `file.txt`
+- `content` - required, string file content
+- `overwrite` - required bool, should we overwrite the existing file
 
 ##Sample using
 

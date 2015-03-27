@@ -220,8 +220,10 @@ Register repository class inherited from `SPListRepo.ListRepository`.
 Create repository:  
 
 ```javascript
-var newsRepository = new MyApp.NewsRepository("Lists/News");  
-
+ExecuteOrDelayUntilScriptLoaded(function(){
+	var newsRepository = new MyApp.NewsRepository("Lists/News");  
+	.........
+},"sp.js");
 ```    
 
 Get top 5 news from March: 

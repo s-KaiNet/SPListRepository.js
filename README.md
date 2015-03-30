@@ -3,6 +3,11 @@ Repository pattern implementation for convenient list data access through the Sh
 
 Main file is `js\build\release\sp.list.repository.min.js `
 
+###NuGet: 
+```
+Install-Package SPListRepository.js 
+```
+
 How to run\build:   
 1. Clone the repository  
 2. Run `grunt release` for release or `grunt dev` for development.

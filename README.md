@@ -7,6 +7,10 @@ Main file is `js\build\release\sp.list.repository.min.js `
 ```
 Install-Package SPListRepository.js 
 ```
+###Bower:
+```
+bower install SPListRepository.js
+```  
 
 How to run\build:   
 1. Clone the repository  

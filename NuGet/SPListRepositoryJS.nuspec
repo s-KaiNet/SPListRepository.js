@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>SPListRepository.js</id>
+        <version>1.0.0</version>
+        <authors>Sergei Sergeev</authors>
+        <owners>Sergei Sergeev</owners>
+        <licenseUrl>https://github.com/s-KaiNet/SPListRepository.js/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/s-KaiNet/SPListRepository.js</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model.</description>
+        <tags>SharePoint JavaScript Repository pattern</tags>
+    </metadata>
+    <files>
+        <file src="content\Scripts\sp.list.repository.min.js" target="content\Scripts\sp.list.repository.min.js" />
+    </files>
+</package>

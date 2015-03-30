@@ -332,8 +332,8 @@ SPListRepo.ListRepository =
 						resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));
 					}
 					
-					SPListRepo.Logger.log(String.format("Getting results ({0}):", resultItemList.length));
-					SPListRepo.Logger.log(resultItemList);
+					console.log(String.format("Getting results ({0}):", resultItemList.length));
+					console.log(resultItemList);
 					deferred.resolve(resultItemList);
 
 				}, function (sender, args) {
@@ -409,8 +409,8 @@ SPListRepo.ListRepository =
 		
 		_getSPCamlQuery: function(viewXmlObject){
 			var viewQuery = viewXmlObject.ToString();
-			SPListRepo.Logger.log("Running query:");
-			SPListRepo.Logger.log(viewQuery);
+			console.log("Running query:");
+			console.log(viewQuery);
 			var query = new SP.CamlQuery();
 			query.set_viewXml(viewQuery);			
 			return query;

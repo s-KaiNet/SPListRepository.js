@@ -1,5 +1,5 @@
 # SPListRepository.js
-Repository pattern implementation for convenient list data access thought the SharePoint JavaScript client object model.  
+Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model. Tested with SharePoint 2013 and SharePoint Online.
 
 Main file is `js\build\release\sp.list.repository.min.js `
 

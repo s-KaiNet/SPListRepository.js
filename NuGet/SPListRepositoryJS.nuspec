@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>SPListRepository.js</id>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
         <authors>Sergei Sergeev</authors>
         <owners>Sergei Sergeev</owners>
         <licenseUrl>https://github.com/s-KaiNet/SPListRepository.js/blob/master/LICENSE</licenseUrl>

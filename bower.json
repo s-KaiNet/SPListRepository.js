@@ -8,7 +8,7 @@
     "JSOM"
   ],
   "dependencies": {
-    "jquery": "1.6.0"
+    "jquery": ">1.6.0"
   },
   "authors": [
     "Sergei Sergeev"

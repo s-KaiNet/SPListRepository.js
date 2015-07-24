@@ -1,6 +1,5 @@
 {
   "name": "SPListRepository.js",
-  "version": "1.0.0",
   "description": "Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model.",
   "main": "js/build/release/sp.list.repository.min.js",
   "keywords": [

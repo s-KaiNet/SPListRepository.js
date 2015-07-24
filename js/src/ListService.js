@@ -29,14 +29,8 @@ SPListRepo.ListService =
 	}
 
 	return {
-		getListByUrl: function (listUrl) {
-		
-			if(listsPool[listUrl]){
-				return listsPool[listUrl];
-			}
-			
+		getListByUrl: function (listUrl) {	
 			var loadDeferred = $.Deferred();
-			listsPool[listUrl] = loadDeferred;
 			
 			var webAbsoluteUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
 			var webServerRelativeUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
@@ -45,7 +39,6 @@ SPListRepo.ListService =
 			var context = SP.ClientContext.get_current();
 			
 			var success = function(list){
-				listsPool[listUrl] = list;
 				loadDeferred.resolve(list);			
 			};
 			

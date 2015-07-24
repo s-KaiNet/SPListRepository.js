@@ -78,14 +78,9 @@ SPListRepo.ListService = function($) {
             }
         });
     }
-    var listsPool = {};
     return {
         getListByUrl: function(listUrl) {
-            if (listsPool[listUrl]) return listsPool[listUrl];
-            var loadDeferred = $.Deferred();
-            listsPool[listUrl] = loadDeferred;
-            var webAbsoluteUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl), webServerRelativeUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl), url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl), context = SP.ClientContext.get_current(), success = function(list) {
-                listsPool[listUrl] = list;
+            var loadDeferred = $.Deferred(), webAbsoluteUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl), webServerRelativeUrl = SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl), url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl), context = SP.ClientContext.get_current(), success = function(list) {
                 loadDeferred.resolve(list);
             }, error = function(err) {
                 loadDeferred.reject(new SPListRepo.RequestError(err));

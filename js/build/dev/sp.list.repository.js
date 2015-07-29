@@ -66,7 +66,7 @@ SPListRepo.ListService = function($) {
             },
             success: function(data) {
                 var context = SP.ClientContext.get_current(), list = context.get_web().get_lists().getById(data.d.results[0].Id);
-                context.load(list);
+                context.load(list, "Title", "RootFolder", "Id");
                 context.executeQueryAsync(function() {
                     success(list);
                 }, function(sender, error) {
@@ -87,13 +87,23 @@ SPListRepo.ListService = function($) {
             };
             if (context.get_web().getList) {
                 var list = context.get_web().getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
-                context.load(list);
+                context.load(list, "Title", "RootFolder", "Id");
                 context.executeQueryAsync(function() {
                     success(list);
                 }, function(sender, err) {
                     error(err);
                 });
             } else getListUsingRest(url, success, error);
+            return loadDeferred.promise();
+        },
+        getListById: function(listId) {
+            var loadDeferred = $.Deferred(), context = SP.ClientContext.get_current(), list = context.get_web().get_lists().getById(listId);
+            context.load(list, "Title", "RootFolder", "Id");
+            context.executeQueryAsync(function() {
+                loadDeferred.resolve(list);
+            }, function(sender, err) {
+                loadDeferred.reject(new SPListRepo.RequestError(err));
+            });
             return loadDeferred.promise();
         }
     };
@@ -173,21 +183,24 @@ SPListRepo.BaseListItem.registerClass("SPListRepo.BaseListItem");
 
 SPListRepo.ListRepository = function($) {
     "use strict";
-    function ListRepository(listUrl, listItemConstructor) {
+    function ListRepository(listUrlOrId, listItemConstructor) {
         var e = Function.validateParameters(arguments, [ {
-            name: "listUrl",
+            name: "listUrlOrId",
             type: String
         }, {
             name: "listItemConstructor",
             type: Function
         } ], !0);
         if (e) throw e;
-        this._listUrl = listUrl;
+        var listId, listUrl, guidRegex = /[\da-zA-Z]{8}-([\da-zA-Z]{4}-){3}[\da-zA-Z]{12}/g;
+        listUrlOrId instanceof SP.Guid ? listId = listUrlOrId.toString() : guidRegex.test(listUrlOrId) ? listId = listUrlOrId.match(guidRegex)[0] : listUrl = listUrlOrId;
         this._listItemConstructor = listItemConstructor;
         this._context = SP.ClientContext.get_current();
-        this._loadListDeferred = SPListRepo.ListService.getListByUrl(this._listUrl);
+        this._loadListDeferred = listId ? SPListRepo.ListService.getListById(listId) : SPListRepo.ListService.getListByUrl(listUrl);
         this._loadListDeferred.done(Function.createDelegate(this, function(list) {
             this._list = list;
+            var rootFolderRelativeUrl = list.get_rootFolder().get_serverRelativeUrl();
+            this._listUrl = rootFolderRelativeUrl.replace(SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl), "");
         }));
         this.folder = null;
     }

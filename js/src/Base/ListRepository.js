@@ -2,21 +2,37 @@ SPListRepo.ListRepository =
 (function($){
 	"use strict";
 	
-	function ListRepository(listUrl, listItemConstructor) {
+	function ListRepository(listUrlOrId, listItemConstructor) {
 		var e = Function.validateParameters(arguments, [
-			{ name: "listUrl", type: String },
+			{ name: "listUrlOrId", type: String },
 			{ name: "listItemConstructor", type: Function }
 		], true);
 
 		if (e) throw e;
+		var guidRegex = /[\da-zA-Z]{8}-([\da-zA-Z]{4}-){3}[\da-zA-Z]{12}/g;
+		var listId, listUrl;
+		if(listUrlOrId instanceof SP.Guid){
+			listId = listUrlOrId.toString();
+		} else if(guidRegex.test(listUrlOrId)){
+			listId = listUrlOrId.match(guidRegex)[0];
+		}else{
+			listUrl = listUrlOrId;
+		}
 
-		this._listUrl = listUrl;
 		this._listItemConstructor = listItemConstructor;
 
 		this._context = SP.ClientContext.get_current();
-		this._loadListDeferred = SPListRepo.ListService.getListByUrl(this._listUrl);
+		if(!listId){
+			this._loadListDeferred = SPListRepo.ListService.getListByUrl(listUrl);
+		} else{
+			this._loadListDeferred = SPListRepo.ListService.getListById(listId);
+		}
+		
 		this._loadListDeferred.done(Function.createDelegate(this, function (list) {
 			this._list = list;
+			
+			var rootFolderRelativeUrl = list.get_rootFolder().get_serverRelativeUrl();			
+			this._listUrl = rootFolderRelativeUrl.replace(SPListRepo.Helpers.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl), "");
 		}));
 
 		this.folder = null;

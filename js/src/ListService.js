@@ -15,7 +15,7 @@ SPListRepo.ListService =
 				success: function(data){
 					var context = SP.ClientContext.get_current();
 					var list = context.get_web().get_lists().getById(data.d.results[0].Id);
-					context.load(list);
+					context.load(list, "Title", "RootFolder", "Id");
 					context.executeQueryAsync(function(){
 						success(list);
 					}, function(sender, error){
@@ -47,7 +47,7 @@ SPListRepo.ListService =
 			};
 			if(context.get_web().getList){ //Post Feb.2015 CU - getList() availiable
 				var list = context.get_web().getList(String.format("{0}{1}", webServerRelativeUrl, listUrl)); 
-				context.load(list);
+				context.load(list, "Title", "RootFolder", "Id");
 				context.executeQueryAsync(function(){
 					success(list);
 				}, function(sender, err) { 
@@ -56,6 +56,19 @@ SPListRepo.ListService =
 			}else{							//Pre Feb.2015 CU - getList missing
 				getListUsingRest(url, success, error);
 			}			
+			
+			return loadDeferred.promise();
+		},
+		getListById: function(listId){
+			var loadDeferred = $.Deferred();
+			var context = SP.ClientContext.get_current();
+			var list = context.get_web().get_lists().getById(listId);
+			context.load(list, "Title", "RootFolder", "Id");
+			context.executeQueryAsync(function(){
+				loadDeferred.resolve(list);
+			}, function(sender, err) { 
+				loadDeferred.reject(new SPListRepo.RequestError(err));
+			});
 			
 			return loadDeferred.promise();
 		}

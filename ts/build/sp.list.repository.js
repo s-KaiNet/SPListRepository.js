@@ -71,7 +71,6 @@ var SPListRepo;
 })(SPListRepo || (SPListRepo = {}));
 /// <reference path="../../typings/tsd.d.ts" />
 /// <reference path="ViewScope.ts" />
-/// <reference path="BaseType.ts" />
 var SPListRepo;
 (function (SPListRepo) {
   var QuerySettings = (function () {

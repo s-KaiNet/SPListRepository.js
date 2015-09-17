@@ -2,7 +2,7 @@
 /// <reference path="ViewScope.ts" />
 
 namespace SPListRepo{
-	
+		
 	export class QuerySettings {
 		viewScope: SPListRepo.ViewScope;
 		viewFields: string[];

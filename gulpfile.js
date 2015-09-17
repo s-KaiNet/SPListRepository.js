@@ -6,12 +6,9 @@ var gulp = require("gulp"),
 			"gulp-typescript": "ts"
 		}
 	});
-var sett = {
-            username: "SergeiSergeev@mastekapps.onmicrosoft.com",
-            password: "QazWsx123",
-            siteUrl: "https://mastekapps.sharepoint.com/sites/dev",
-            folder: "SiteAssets"
-        };
+	
+var sett = require("./settings");
+
 var jsSrc = ["ts/src/Helpers.js",
 			"ts/src/Constants.js", 
 			"ts/src/RequestError.js",

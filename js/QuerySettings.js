@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../typings/tsd.d.ts" />
 /// <reference path="ViewScope.ts" />
 var SPListRepo;
 (function (SPListRepo) {

@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../typings/tsd.d.ts" />
 /// <reference path="ViewScope.ts" />
 /// <reference path="Constants.ts" />
 
@@ -18,7 +18,7 @@ namespace SPListRepo{
 		fileLeafRef: string = undefined;
 		
 		constructor(item?: SP.ListItem){
-			if(item){				
+			if(item){
 				this.spListItem = item;
 				this.file = this.spListItem.get_file();
 				this.id = item.get_id();

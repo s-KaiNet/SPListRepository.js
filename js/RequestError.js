@@ -1,5 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
-/// <reference path="BaseType.ts" />
+/// <reference path="../typings/tsd.d.ts" />
 var SPListRepo;
 (function (SPListRepo) {
     var RequestError = (function () {

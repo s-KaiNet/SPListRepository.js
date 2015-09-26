@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../typings/tsd.d.ts" />
 /// <reference path="ViewScope.ts" />
 /// <reference path="Constants.ts" />
 /// <reference path="ListService.ts" />

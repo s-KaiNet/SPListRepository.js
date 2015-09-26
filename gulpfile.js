@@ -9,14 +9,14 @@ var gulp = require("gulp"),
 	
 var sett = require("./settings");
 
-var jsSrc = ["ts/src/Helpers.js",
-			"ts/src/Constants.js", 
-			"ts/src/RequestError.js",
-			"ts/src/QuerySettings.js",
-			"ts/src/ListService.js",
-			"ts/src/ViewScope.js",
-			"ts/src/BaseListItem.js",
-			"ts/src/ListRepository.js"];
+var jsSrc = ["js/Helpers.js",
+			"js/Constants.js", 
+			"js/RequestError.js",
+			"js/QuerySettings.js",
+			"js/ListService.js",
+			"js/ViewScope.js",
+			"js/BaseListItem.js",
+			"js/ListRepository.js"];
 
 gulp.task("js-dev", function () {
 	return gulp.src(jsSrc)
@@ -25,44 +25,35 @@ gulp.task("js-dev", function () {
 		.pipe(gulp.dest("./ts/build/"))
 		.pipe($.rename({ suffix: ".min" }))
 		.pipe($.uglify())
-		.pipe(gulp.dest("./ts/build"));
+		.pipe(gulp.dest("./build"));
 });
 
 gulp.task("ts-def", function(){
-	var tsResult = gulp.src("ts/src/**/*.ts")
+	var tsResult = gulp.src("ts/**/*.ts")
 			.pipe($.ts({
 				target: "ES5",
 				declaration: true,
 				out: "sp.list.repository.js"
 			}));
 
-		return tsResult.dts.pipe(gulp.dest("./ts/build/"));
+		return tsResult.dts.pipe(gulp.dest("./build/"));
+});
+
+gulp.task("ts", function(){
+	return gulp.src("ts/**/*.ts")
+		.pipe($.ts({
+			target: "ES5",
+			declaration: false
+		}))
+		.js
+		.pipe(gulp.dest("./js"));
 });
 
 gulp.task("spsave", ["js-dev"], function(){
-    return gulp.src("./ts/build/*.js")
+    return gulp.src("./build/*.js")
         .pipe($.spsave(sett));
 });
 
 gulp.task("watch", function () {
-	gulp.watch(["ts/src/**/*.ts", "ts/extensions/*.ts"], function(event){
-			var dateNow = new Date();
-			var dateString = util.format("[%s:%s:%s]", 
-			("0" + dateNow.getHours()).slice(-2), 
-			("0" + dateNow.getMinutes()).slice(-2), 
-			("0" + dateNow.getSeconds()).slice(-2));
-			
-			console.log(util.format("%s Compiling .ts file", dateString));
-			
-		var tsResult = gulp.src([event.path])
-			.pipe($.ts({
-				target: "ES5",
-				declaration: false,
-				removeComments: true
-			}));
-
-		return tsResult.js.pipe(gulp.dest(path.dirname(event.path)));
-	});
-	
-	gulp.watch(["ts/src/**/*.js"], ["js-dev", "spsave"]);
+	gulp.watch(["ts/**/*.ts"], ["ts", "js-dev", "spsave"]);
 });

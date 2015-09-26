@@ -3,7 +3,8 @@ var gulp = require("gulp"),
 	util = require("util"),
 	$ = require("gulp-load-plugins")({
 		rename: {
-			"gulp-typescript": "ts"
+			"gulp-typescript": "ts",
+			"gulp-jasmine-inject": "jasmineInject"
 		}
 	});
 	
@@ -20,9 +21,9 @@ var jsSrc = ["js/Helpers.js",
 
 gulp.task("js-dev", function () {
 	return gulp.src(jsSrc)
-		.pipe($.beautify({indentSize: 2}))
+		.pipe($.jsbeautifier({mode: "VERIFY_AND_WRITE"}))
 		.pipe($.concat("sp.list.repository.js"))
-		.pipe(gulp.dest("./ts/build/"))
+		.pipe(gulp.dest("./build"))
 		.pipe($.rename({ suffix: ".min" }))
 		.pipe($.uglify())
 		.pipe(gulp.dest("./build"));
@@ -36,7 +37,7 @@ gulp.task("ts-def", function(){
 				out: "sp.list.repository.js"
 			}));
 
-		return tsResult.dts.pipe(gulp.dest("./build/"));
+		return tsResult.dts.pipe(gulp.dest("./build"));
 });
 
 gulp.task("ts", function(){
@@ -47,6 +48,29 @@ gulp.task("ts", function(){
 		}))
 		.js
 		.pipe(gulp.dest("./js"));
+});
+
+gulp.task("ts-tests", function(){
+	return gulp.src("tests/**/*.ts")
+		.pipe($.ts({
+			target: "ES5",
+			declaration: false
+		}))
+		.js
+		.pipe(gulp.dest("./tests/js"));
+});
+
+gulp.task("tests", ["ts-tests"], function(){
+	return gulp.src("tests/js/spec.js")
+		.pipe($.jasmineInject({
+			siteUrl: sett.siteUrl,
+			username: sett.username,
+			password: sett.password,
+			phantomInitCallbacks: [path.resolve("./tests/lib/sharepoint.callback.js")],
+			additionalJS: ["./tests/lib/jquery.js", "./build/sp.list.repository.min.js"],
+			verbose: false
+		}))
+		.pipe(gulp.dest("tests/test_results"));
 });
 
 gulp.task("spsave", ["js-dev"], function(){

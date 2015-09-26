@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<test-results name="Jasmine Results" total="1" failures="1" not-run="0" date="2015-09-26" time="20:55:33">
+ <test-suite name="Test SPListRepository" executed="true" success="false" time="0.005">
+  <results>
+   <test-case name="should get item by id" executed="true" success="false" time="0.004">
+    <failure>
+     <message><![CDATA[ReferenceError: Can't find variable: $ in ./build/sp.list.repository.min.js (line 1)]]></message>
+     <stack-trace><![CDATA[ReferenceError: Can't find variable: $
+    at ./build/sp.list.repository.min.js:1
+    at t (./build/sp.list.repository.min.js:1)
+    at c:\Projects\SPListRepository\tests\js\spec.js:5
+    at attemptAsync (./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1819)
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1774
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1762
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:627
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:357
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:2360
+    at attemptAsync (./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1819)
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1774
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1762
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:627
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:2354
+    at attemptAsync (./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1819)
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1774
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:1762
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:627
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:2215
+    at ./../node_modules/jasmine-core/lib/jasmine-core/jasmine.js:678
+    at phantomjs://webpage.evaluate():2
+    at phantomjs://webpage.evaluate():3
+    at phantomjs://webpage.evaluate():3]]></stack-trace>
+    </failure>
+   </test-case>
+  </results>
+ </test-suite>
+</test-results>

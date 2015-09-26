@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<test-results name="Jasmine Results" total="1" failures="0" not-run="0" date="2015-09-26" time="21:00:59">
+ <test-suite name="Test SPListRepository" executed="true" success="true" time="0.328">
+  <results>
+   <test-case name="should get item by id" executed="true" success="true" time="0.326">
+   </test-case>
+  </results>
+ </test-suite>
+</test-results>

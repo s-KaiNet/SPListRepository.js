@@ -1,0 +1,16 @@
+﻿{
+	"siteUrl": "http://sp2013dev/sites/dev",
+	"namespace": "MyApp",
+	"creds": {
+		"username": "sp\\administrator",
+		"password": "QazWsx123"
+	},
+	"lists": {
+		"all": true,
+		"excludeHidden": true
+	},
+	"fields": {
+		"all": true,
+		"excludeHidden": true
+	}
+}

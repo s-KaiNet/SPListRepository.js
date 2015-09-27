@@ -1,5 +1,5 @@
 /// <reference path="typings/tsd.d.ts" />
-declare module SPListRepo {
+declare namespace SPListRepo {
     enum ViewScope {
         FilesOnly = 0,
         FoldersOnly = 1,
@@ -9,7 +9,7 @@ declare module SPListRepo {
         FilesFoldersRecursive = 5,
     }
 }
-declare module SPListRepo.Fields {
+declare namespace SPListRepo.Fields {
     var Modified: string;
     var Created: string;
     var ModifiedBy: string;
@@ -21,11 +21,11 @@ declare module SPListRepo.Fields {
     var FileDirRef: string;
     var ContentTypeId: string;
 }
-declare module SPListRepo.ErrorCodes {
+declare namespace SPListRepo.ErrorCodes {
     var FolderAlreadyExists: number;
     var IllegalName: number;
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     class BaseListItem {
         spListItem: SP.ListItem;
         file: SP.File;
@@ -42,13 +42,13 @@ declare module SPListRepo {
         getFieldValue(name: string): any;
     }
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     class Helper {
         static ensureTrailingSlash(url: string): string;
         static ensureLeadingSlash(url: string): string;
     }
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     class RequestError {
         stackTrace: string;
         message: string;
@@ -59,7 +59,7 @@ declare module SPListRepo {
         constructor(error: SP.ClientRequestFailedEventArgs | string);
     }
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     class ListService {
         private $;
         static getListByUrl(listUrl: string): JQueryPromise<SP.List>;
@@ -67,7 +67,7 @@ declare module SPListRepo {
         private static getListUsingRest(url, success, error);
     }
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     class QuerySettings {
         viewScope: SPListRepo.ViewScope;
         viewFields: string[];
@@ -75,7 +75,7 @@ declare module SPListRepo {
         constructor(viewScope?: SPListRepo.ViewScope, viewFields?: string[], rowLimit?: number);
     }
 }
-declare module SPListRepo {
+declare namespace SPListRepo {
     interface IBaseItemConstruct<T extends BaseListItem> {
         new (item?: SP.ListItem): T;
     }
@@ -99,7 +99,7 @@ declare module SPListRepo {
         private _getItemBySPCamlQuery(spCamlQuery);
         private _addItem(model);
         private _updateItem(model);
-        private _setFieldValues(item, model);
+        protected _setFieldValues(item: SP.ListItem, model: T): void;
         private _getItemsByExpression(camlExpression, querySettings?);
         private _getViewQuery(camlExpression, querySettings);
         private _getSPCamlQuery(viewXmlObject);

@@ -32,7 +32,7 @@ namespace SPListRepo{
 			}
 		}
 		
-		getFieldValue(name:string){
+		getFieldValue(name:string): any{
 			var value = this.spListItem.get_fieldValues()[name];
 		
 		if(typeof value !== "undefined"){

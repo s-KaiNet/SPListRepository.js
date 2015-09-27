@@ -1,0 +1,190 @@
+﻿<#@ template  debug="true" hostSpecific="true" #>
+<#@ output extension="/" #>
+<#@ include file="$(SolutionDir)external\TemplateFileManagerV2.1.ttinclude" #>
+<#@ assembly name="$(SolutionDir)packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll" #>
+<#@ assembly name="$(SolutionDir)packages\Microsoft.SharePointOnline.CSOM.16.1.3912.1204\lib\net45\Microsoft.SharePoint.Client.Runtime.dll" #>
+<#@ assembly name="$(SolutionDir)packages\Microsoft.SharePointOnline.CSOM.16.1.3912.1204\lib\net45\Microsoft.SharePoint.Client.dll" #>
+<#@ Assembly name="$(SolutionDir)SPListRepository.Generator\bin\Debug\SPListRepository.Generator.exe" #>
+<#@ Assembly Name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Security" #>
+<#@ import namespace="System.Net" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Newtonsoft.Json" #>
+<#@ import namespace="SPListRepository.Generator" #>
+<#@ import namespace="Microsoft.SharePoint.Client" #>
+<#
+	var absolutePath = Host.ResolvePath("sp.list.repository.config.json");
+	var configString = System.IO.File.ReadAllText(absolutePath);
+
+
+	var manager = TemplateFileManager.Create(this);
+	
+	var config = JsonConvert.DeserializeObject<SPListRepository.Generator.GeneratorConfig>(configString);
+	CheckSchemaConsistency(config);
+
+	using(var ctx = CreateContext(config))
+	{
+		var lists = ctx.Web.Lists;
+
+		ctx.Load(lists, l =>  l.Include(r => r.RootFolder, r => r.Hidden, r => r.Title));
+		ctx.ExecuteQuery();
+
+		foreach (List list in lists)
+		{
+			if(IsListAcceptable(list, config))
+			{
+				var listTitleFixed = list.Title.Replace(" ", string.Empty);
+				manager.StartNewFile(listTitleFixed + ".ts");
+#>namespace <#=config.Namespace#>{
+	export class <#=listTitleFixed#>BaseItem extends SPListRepo.BaseListItem{
+		constructor(item?: SP.ListItem){
+			super(item);
+			if(item){
+<#
+				var fields = list.Fields;
+				ctx.Load(fields, f => f.Include(g => g.Hidden,g => g.InternalName));
+				ctx.ExecuteQuery();
+				foreach(Field field in fields)
+				{
+					if(IsFieldAcceptable(field, config))
+					{
+#>				this.<#=field.InternalName  #> = this.getFieldValue("<#=field.InternalName#>");
+<#
+					}
+				}
+#>			}
+		}
+
+<#
+				foreach(Field field in fields)
+				{
+					if(IsFieldAcceptable(field, config))
+					{
+#>		<#=field.InternalName  #>: any;
+<#
+					}
+				}
+
+#>	}
+<#
+#>}<#
+
+				manager.EndBlock();
+			}
+		}
+	}
+
+	manager.Process();
+ #>
+
+<#+ public ClientContext CreateContext(GeneratorConfig config)
+	{
+		var ctx = new ClientContext(config.SiteUrl);
+
+		var isOnPrem = config.SiteUrl.IndexOf(".sharepoint.com") == -1;
+
+		if(isOnPrem && config.Creds != null){
+			ctx.Credentials = new NetworkCredential(config.Creds.UserName, config.Creds.Password);
+		} else{
+			var passWord = new SecureString();
+			foreach (char c in config.Creds.Password.ToCharArray()) passWord.AppendChar(c);
+
+			ctx.Credentials = new SharePointOnlineCredentials(config.Creds.UserName, passWord);
+		}
+
+		return ctx;
+	}#>
+
+<#+ public bool IsListAcceptable(List list, GeneratorConfig config)
+	{
+		if(config.Lists.All)
+		{
+			if(config.Lists.ExcludeHidden && list.Hidden)
+			{
+				return false;
+			}
+
+			if(config.Lists.Exclude.Count > 0 && config.Lists.Exclude.Any(url => url.IndexOf(list.RootFolder.ServerRelativeUrl, StringComparison.OrdinalIgnoreCase) != -1))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		if(config.Lists.Include.Count > 0)
+		{
+			return config.Lists.Include.Any(url => url.IndexOf(list.RootFolder.ServerRelativeUrl, StringComparison.OrdinalIgnoreCase) != -1);
+		}
+
+		return false;
+}#>
+
+<#+ public bool IsFieldAcceptable(Field field, GeneratorConfig config)
+	{
+		var baseFieldsToExclude = new []{"ID", "Modified", "Created", "Editor", "Author", "FSObjType", "Title", "FileLeafRef", "FileDirRef", "ContentTypeId"};
+
+		if(baseFieldsToExclude.ToList().Any(f => f.Equals(field.InternalName)))
+		{
+			return false;
+		}
+
+		if(config.Fields.All)
+		{
+			if(config.Fields.ExcludeHidden && field.Hidden)
+			{
+				return false;
+			}
+
+			if(config.Fields.Exclude.Count > 0 && config.Fields.Exclude.Any(f => f.Equals(field.InternalName)))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		if(config.Fields.Include.Count > 0)
+		{
+			return config.Fields.Include.Any(f => f.Equals(field.InternalName));
+		}
+
+		return false;
+}#>
+
+<#+ public void CheckSchemaConsistency(GeneratorConfig config){
+		if(config.Lists == null)
+		{
+			throw new Exception("lists attribute is required");
+		}
+
+		if(config.Lists.All && config.Lists.Include.Count > 0)
+		{
+			throw new Exception("Lists config: provide only one of the two properties - either 'all' or 'include'");
+		}
+
+		if(config.Lists.Include.Count > 0 && (config.Lists.Exclude.Count > 0 || config.Lists.ExcludeHidden))
+		{
+			throw new Exception("Lists config: properties 'exclude' and 'excludeHidden' are redundant when 'include' provided");
+		}
+
+		if(config.Fields == null)
+		{
+			throw new Exception("fields attribute is required");
+		}
+
+		if(config.Fields.All && config.Fields.Include.Count > 0)
+		{
+			throw new Exception("Fields config: provide only one of the two properties - either 'all' or 'include'");
+		}
+
+		if(config.Fields.Include.Count > 0 && (config.Fields.Exclude.Count > 0 || config.Fields.ExcludeHidden))
+		{
+			throw new Exception("Fields config: properties 'exclude' and 'excludeHidden' are redundant when 'include' provided");
+		}
+}#>

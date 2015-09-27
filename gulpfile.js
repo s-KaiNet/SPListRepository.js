@@ -79,5 +79,5 @@ gulp.task("spsave", ["js-dev"], function(){
 });
 
 gulp.task("watch", function () {
-	gulp.watch(["ts/**/*.ts"], ["ts", "js-dev", "spsave"]);
+	gulp.watch(["ts/**/*.ts"], ["ts", "ts-def", "js-dev", "spsave"]);
 });

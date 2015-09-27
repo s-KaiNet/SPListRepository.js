@@ -224,7 +224,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		private _setFieldValues(item: SP.ListItem, model: T){
+		protected _setFieldValues(item: SP.ListItem, model: T){
 			item.set_item(SPListRepo.Fields.Title, model.title);
 			
 			if (model.fileLeafRef) {

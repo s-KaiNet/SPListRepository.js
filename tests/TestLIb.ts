@@ -1,7 +1,4 @@
-﻿/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="../build/sp.list.repository.d.ts" />
-
-namespace MyApp{
+﻿namespace MyApp{
 	export class TestLIbBaseItem extends SPListRepo.BaseListItem{
 		testText: string;
 		testMultilineText: SP.FieldMultiLineText;

@@ -188,8 +188,9 @@ namespace SPListRepo{
 					itemCreateInfo.set_folderUrl(this._getFolderRelativeUrl());
 				}
 				var newItem = this._list.addItem(itemCreateInfo);
-
-				this._setFieldValues(newItem, model);
+				
+				model.mapToListItem(newItem);
+				
 				var self = this;
 
 				newItem.update();
@@ -209,8 +210,9 @@ namespace SPListRepo{
 				
 				var item = this._list.getItemById(model.id);
 				this._context.load(item);
+				
+				model.mapToListItem(item);
 
-				this._setFieldValues(item, model);
 				var self = this;
 
 				item.update();
@@ -222,14 +224,6 @@ namespace SPListRepo{
 					deferred.reject(new SPListRepo.RequestError(args));
 				});
 			});
-		}
-		
-		protected _setFieldValues(item: SP.ListItem, model: T){
-			item.set_item(SPListRepo.Fields.Title, model.title);
-			
-			if (model.fileLeafRef) {
-				item.set_item(SPListRepo.Fields.FileLeafRef, model.fileLeafRef);
-			}
 		}
 		
 		private _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: SPListRepo.QuerySettings) : JQueryPromise<T[]>{

@@ -6,8 +6,7 @@
 		"password": "QazWsx123"
 	},
 	"lists": {
-		"all": true,
-		"excludeHidden": true
+		"include": ["Lists/TestCategories", "TestLIb"]
 	},
 	"fields": {
 		"all": true,

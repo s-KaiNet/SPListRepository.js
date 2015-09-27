@@ -67,7 +67,10 @@ gulp.task("tests", ["ts-tests"], function(){
 			username: sett.username,
 			password: sett.password,
 			phantomInitCallbacks: [path.resolve("./tests/lib/sharepoint.callback.js")],
-			additionalJS: ["./tests/lib/jquery.js", "./build/sp.list.repository.min.js"],
+			additionalJS: ["./tests/lib/jquery.js", 
+							"./build/sp.list.repository.min.js",
+							"./tests/js/TestCategories.js",
+							"./tests/js/TestLib.js"],
 			verbose: false
 		}))
 		.pipe(gulp.dest("tests/test_results"));

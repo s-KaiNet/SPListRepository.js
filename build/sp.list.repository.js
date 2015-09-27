@@ -195,12 +195,21 @@ var SPListRepo;
                 this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();
             }
         }
+        BaseListItem.prototype.mapToListItem = function(item) {
+            this.setFieldValue(item, SPListRepo.Fields.Title, this.title);
+            this.setFieldValue(item, SPListRepo.Fields.FileLeafRef, this.fileLeafRef);
+        };
         BaseListItem.prototype.getFieldValue = function(name) {
             var value = this.spListItem.get_fieldValues()[name];
             if (typeof value !== "undefined") {
                 return this.spListItem.get_item(name);
             }
             return undefined;
+        };
+        BaseListItem.prototype.setFieldValue = function(item, name, value) {
+            if (value !== undefined) {
+                item.set_item(name, value);
+            }
         };
         return BaseListItem;
     })();
@@ -353,7 +362,7 @@ var SPListRepo;
                     itemCreateInfo.set_folderUrl(_this._getFolderRelativeUrl());
                 }
                 var newItem = _this._list.addItem(itemCreateInfo);
-                _this._setFieldValues(newItem, model);
+                model.mapToListItem(newItem);
                 var self = _this;
                 newItem.update();
                 _this._context.load(newItem);
@@ -370,7 +379,7 @@ var SPListRepo;
             return this._withPromise(function(deferred) {
                 var item = _this._list.getItemById(model.id);
                 _this._context.load(item);
-                _this._setFieldValues(item, model);
+                model.mapToListItem(item);
                 var self = _this;
                 item.update();
                 _this._context.executeQueryAsync(function() {
@@ -380,12 +389,6 @@ var SPListRepo;
                     deferred.reject(new SPListRepo.RequestError(args));
                 });
             });
-        };
-        ListRepository.prototype._setFieldValues = function(item, model) {
-            item.set_item(SPListRepo.Fields.Title, model.title);
-            if (model.fileLeafRef) {
-                item.set_item(SPListRepo.Fields.FileLeafRef, model.fileLeafRef);
-            }
         };
         ListRepository.prototype._getItemsByExpression = function(camlExpression, querySettings) {
             querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);

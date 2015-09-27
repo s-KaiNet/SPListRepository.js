@@ -39,7 +39,10 @@ declare namespace SPListRepo {
         fileSystemObjectType: SP.FileSystemObjectType;
         fileLeafRef: string;
         constructor(item?: SP.ListItem);
-        getFieldValue(name: string): any;
+        mapFromListItem(item: SP.ListItem): void;
+        mapToListItem(item: SP.ListItem): void;
+        protected getFieldValue(name: string): any;
+        protected setFieldValue(item: SP.ListItem, name: string, value: any): void;
     }
 }
 declare namespace SPListRepo {
@@ -99,7 +102,6 @@ declare namespace SPListRepo {
         private _getItemBySPCamlQuery(spCamlQuery);
         private _addItem(model);
         private _updateItem(model);
-        protected _setFieldValues(item: SP.ListItem, model: T): void;
         private _getItemsByExpression(camlExpression, querySettings?);
         private _getViewQuery(camlExpression, querySettings);
         private _getSPCamlQuery(viewXmlObject);

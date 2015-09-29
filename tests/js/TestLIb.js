@@ -14,6 +14,7 @@ var MyApp;
             }
         }
         TestLIbBaseItem.prototype.mapFromListItem = function (item) {
+            _super.prototype.mapFromListItem.call(this, item);
             this.testText = this.getFieldValue("TestText");
             this.testMultilineText = this.getFieldValue("TestMultilineText");
             this.testChoice = this.getFieldValue("TestChoice");

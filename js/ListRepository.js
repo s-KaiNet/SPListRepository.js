@@ -240,7 +240,7 @@ var SPListRepo;
                 var self = _this;
                 _this._context.executeQueryAsync(function () {
                     var itemsEnumerator = items.getEnumerator();
-                    var resultItemList;
+                    var resultItemList = [];
                     while (itemsEnumerator.moveNext()) {
                         resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));
                     }

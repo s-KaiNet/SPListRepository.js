@@ -301,7 +301,7 @@ namespace SPListRepo{
 
 				this._context.executeQueryAsync(function () {
 					var itemsEnumerator = items.getEnumerator();
-					var resultItemList: T[];
+					var resultItemList: T[] = [];
 
 					while (itemsEnumerator.moveNext()) {
 						resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));

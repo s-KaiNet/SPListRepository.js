@@ -108,7 +108,7 @@ var SPListRepo;
             };
             if ((context.get_web()).getList) {
                 var list = (context.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
-                context.load(list);
+                context.load(list, "Title", "RootFolder", "Id");
                 context.executeQueryAsync(function() {
                     success(list);
                 }, function(sender, err) {
@@ -142,7 +142,7 @@ var SPListRepo;
                 success: function(data) {
                     var context = SP.ClientContext.get_current();
                     var list = context.get_web().get_lists().getById(data.d.results[0].Id);
-                    context.load(list);
+                    context.load(list, "Title", "RootFolder", "Id");
                     context.executeQueryAsync(function() {
                         success(list);
                     }, function(sender, e) {
@@ -183,18 +183,21 @@ var SPListRepo;
         function BaseListItem(item) {
             this.fileLeafRef = undefined;
             if (item) {
-                this.spListItem = item;
-                this.file = this.spListItem.get_file();
-                this.id = item.get_id();
-                this.created = this.getFieldValue(SPListRepo.Fields.Created);
-                this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);
-                this.modified = this.getFieldValue(SPListRepo.Fields.Modified);
-                this.modifiedBy = this.getFieldValue(SPListRepo.Fields.ModifiedBy);
-                this.title = this.getFieldValue(SPListRepo.Fields.Title);
-                this.fileDirRef = this.getFieldValue(SPListRepo.Fields.FileDirRef);
-                this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();
+                this.mapFromListItem(item);
             }
         }
+        BaseListItem.prototype.mapFromListItem = function(item) {
+            this.spListItem = item;
+            this.file = this.spListItem.get_file();
+            this.id = item.get_id();
+            this.created = this.getFieldValue(SPListRepo.Fields.Created);
+            this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);
+            this.modified = this.getFieldValue(SPListRepo.Fields.Modified);
+            this.modifiedBy = this.getFieldValue(SPListRepo.Fields.ModifiedBy);
+            this.title = this.getFieldValue(SPListRepo.Fields.Title);
+            this.fileDirRef = this.getFieldValue(SPListRepo.Fields.FileDirRef);
+            this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();
+        };
         BaseListItem.prototype.mapToListItem = function(item) {
             this.setFieldValue(item, SPListRepo.Fields.Title, this.title);
             this.setFieldValue(item, SPListRepo.Fields.FileLeafRef, this.fileLeafRef);
@@ -454,7 +457,7 @@ var SPListRepo;
                 var self = _this;
                 _this._context.executeQueryAsync(function() {
                     var itemsEnumerator = items.getEnumerator();
-                    var resultItemList;
+                    var resultItemList = [];
                     while (itemsEnumerator.moveNext()) {
                         resultItemList.push(new self._listItemConstructor(itemsEnumerator.get_current()));
                     }

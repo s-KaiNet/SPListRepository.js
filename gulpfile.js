@@ -1,6 +1,7 @@
 var gulp = require("gulp"),
 	path = require("path"),
 	util = require("util"),
+	runSequence = require('run-sequence'),
 	$ = require("gulp-load-plugins")({
 		rename: {
 			"gulp-typescript": "ts",
@@ -68,7 +69,8 @@ gulp.task("tests", ["ts-tests"], function(){
 			password: sett.password,
 			phantomInitCallbacks: [path.resolve("./tests/lib/sharepoint.callback.js")],
 			additionalJS: ["./tests/lib/jquery.js", 
-							"./build/sp.list.repository.min.js",
+							"./tests/lib/camljs.js",
+							"./build/sp.list.repository.js",
 							"./tests/js/TestCategories.js",
 							"./tests/js/TestLib.js"],
 			verbose: false
@@ -82,5 +84,8 @@ gulp.task("spsave", ["js-dev"], function(){
 });
 
 gulp.task("watch", function () {
-	gulp.watch(["ts/**/*.ts"], ["ts", "ts-def", "js-dev", "spsave"]);
+	//gulp.watch(["ts/**/*.ts"], ["ts", "ts-def", "js-dev", "spsave"]);
+	gulp.watch(["ts/**/*.ts"], function(){
+		runSequence("ts", "js-dev", ["ts-def", "spsave"]);
+	});
 });

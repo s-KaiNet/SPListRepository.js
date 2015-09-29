@@ -19,7 +19,7 @@ namespace SPListRepo{
 		
 		constructor(item?: SP.ListItem){
 			if(item){
-				this.mapFromListItem(item);			
+				this.mapFromListItem(item);
 			}
 		}		
 		

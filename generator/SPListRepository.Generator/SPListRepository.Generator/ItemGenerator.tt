@@ -67,6 +67,8 @@ namespace <#=config.Namespace#>{
 		}
 
 		mapFromListItem(item: SP.ListItem): void{
+			super.mapFromListItem(item);
+
 <#				foreach(Field field in fields)
 				{
 					if(Helper.IsFieldAcceptable(field, config))

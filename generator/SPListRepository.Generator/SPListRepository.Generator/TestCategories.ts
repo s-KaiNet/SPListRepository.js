@@ -21,6 +21,8 @@ namespace MyApp{
 		}
 
 		mapFromListItem(item: SP.ListItem): void{
+			super.mapFromListItem(item);
+
 			this.contentType = this.getFieldValue("ContentType");
 			this._UIVersionString = this.getFieldValue("_UIVersionString");
 			this.edit = this.getFieldValue("Edit");

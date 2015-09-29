@@ -33,6 +33,8 @@
 		}
 
 		mapFromListItem(item: SP.ListItem): void{
+			super.mapFromListItem(item);
+			
 			this.testText = this.getFieldValue("TestText");
 			this.testMultilineText = this.getFieldValue("TestMultilineText");
 			this.testChoice = this.getFieldValue("TestChoice");

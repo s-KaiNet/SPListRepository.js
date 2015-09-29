@@ -25,7 +25,7 @@ namespace SPListRepo{
 			
 			if((<any>(context.get_web())).getList){ //Post Feb.2015 CU - getList() availiable
 				var list = (<any>(context.get_web())).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl)); 
-				context.load(list);
+				context.load(list, "Title", "RootFolder", "Id");
 				context.executeQueryAsync(function(){
 					success(list);
 				}, function(sender, err) { 
@@ -51,7 +51,7 @@ namespace SPListRepo{
 			
 			return loadDeferred.promise();
 		}
-				
+		
 		private static getListUsingRest(url:string, success:(lsit:SP.List) => void, error: (err:SPListRepo.RequestError) => void){
 			$.ajax({
 				url: url, 
@@ -63,7 +63,7 @@ namespace SPListRepo{
 				success: function(data){
 					var context = SP.ClientContext.get_current();
 					var list = context.get_web().get_lists().getById(data.d.results[0].Id);
-					context.load(list);
+					context.load(list, "Title", "RootFolder", "Id");
 					context.executeQueryAsync(function(){
 						success(list);
 					}, function(sender, e){

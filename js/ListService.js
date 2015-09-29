@@ -21,7 +21,7 @@ var SPListRepo;
             };
             if ((context.get_web()).getList) {
                 var list = (context.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
-                context.load(list);
+                context.load(list, "Title", "RootFolder", "Id");
                 context.executeQueryAsync(function () {
                     success(list);
                 }, function (sender, err) {
@@ -56,7 +56,7 @@ var SPListRepo;
                 success: function (data) {
                     var context = SP.ClientContext.get_current();
                     var list = context.get_web().get_lists().getById(data.d.results[0].Id);
-                    context.load(list);
+                    context.load(list, "Title", "RootFolder", "Id");
                     context.executeQueryAsync(function () {
                         success(list);
                     }, function (sender, e) {

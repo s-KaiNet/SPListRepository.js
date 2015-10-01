@@ -160,6 +160,7 @@ var SPListRepo;
 })(SPListRepo || (SPListRepo = {}));
 
 /// <reference path="../typings/tsd.d.ts" />
+//https://msdn.microsoft.com/en-us/library/dd923822%28v=office.12%29.aspx
 var SPListRepo;
 (function(SPListRepo) {
     (function(ViewScope) {
@@ -168,7 +169,7 @@ var SPListRepo;
         ViewScope[ViewScope["FilesFolders"] = 2] = "FilesFolders";
         ViewScope[ViewScope["FilesOnlyRecursive"] = 3] = "FilesOnlyRecursive";
         ViewScope[ViewScope["FoldersOnlyRecursive"] = 4] = "FoldersOnlyRecursive";
-        ViewScope[ViewScope["FilesFoldersRecursive"] = 5] = "FilesFoldersRecursive"; //Shows all files(items) AND folders in the specified folder or any folder descending from it
+        ViewScope[ViewScope["FilesFoldersRecursive"] = 5] = "FilesFoldersRecursive"; //Shows all files(items) AND folders in the specified folder or any folder descending from it (<View Scope="RecursiveAll")
     })(SPListRepo.ViewScope || (SPListRepo.ViewScope = {}));
     var ViewScope = SPListRepo.ViewScope;
 })(SPListRepo || (SPListRepo = {}));
@@ -261,7 +262,7 @@ var SPListRepo;
             });
         };
         ListRepository.prototype.getItemsByTitle = function(title, querySettings) {
-            var camlExpression = CamlBuilder.Expression().TextField("Title").EqualTo(title);
+            var camlExpression = CamlBuilder.Expression().TextField(SPListRepo.Fields.Title).EqualTo(title);
             return this._getItemsByExpression(camlExpression, querySettings);
         };
         ListRepository.prototype.getItemsByIds = function(ids, querySettings) {
@@ -333,7 +334,7 @@ var SPListRepo;
                 folder.set_underlyingObjectType(SP.FileSystemObjectType.folder);
                 folder.set_leafName(folderName);
                 var folderItem = _this._list.addItem(folder);
-                folderItem.set_item("Title", folderName);
+                folderItem.set_item(SPListRepo.Fields.Title, folderName);
                 folderItem.update();
                 var self = _this;
                 _this._context.load(folderItem);
@@ -413,6 +414,7 @@ var SPListRepo;
                 });
             });
         };
+        //NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
         ListRepository.prototype._getItemsByExpression = function(camlExpression, querySettings) {
             querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
             var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));

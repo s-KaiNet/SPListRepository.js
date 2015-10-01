@@ -59,7 +59,7 @@ namespace SPListRepo{
 		}
 		
 		getItemsByTitle(title: string, querySettings?: QuerySettings): JQueryPromise<T[]>{
-			var camlExpression = CamlBuilder.Expression().TextField("Title").EqualTo(title);
+			var camlExpression = CamlBuilder.Expression().TextField(Fields.Title).EqualTo(title);
 			
 			return this._getItemsByExpression(camlExpression, querySettings);
 		}
@@ -144,7 +144,7 @@ namespace SPListRepo{
 				folder.set_underlyingObjectType(SP.FileSystemObjectType.folder);
 				folder.set_leafName(folderName);
 				var folderItem = this._list.addItem(folder);
-				folderItem.set_item("Title", folderName);
+				folderItem.set_item(Fields.Title, folderName);
 				folderItem.update();
 				var self = this;
 				this._context.load(folderItem);
@@ -180,7 +180,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		private _getItemBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T>{
+		protected _getItemBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T>{
 			var deferred = this._createDeferred();
 
 			this._getItemsBySPCamlQuery(spCamlQuery)
@@ -196,8 +196,8 @@ namespace SPListRepo{
 			return deferred.promise();
 		}
 		
-		private _addItem(model: T): JQueryPromise<T>{
-			return this._withPromise(deferred => {
+		protected _addItem(model: T): JQueryPromise<T>{
+			return this._withPromise<T>(deferred => {
 			
 			var itemCreateInfo = new SP.ListItemCreationInformation();
 				if (this.folder) {
@@ -221,7 +221,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		private _updateItem(model: T): JQueryPromise<T>{
+		protected _updateItem(model: T): JQueryPromise<T>{
 			return this._withPromise<T>(deferred => {
 				
 				var item = this._list.getItemById(model.id);
@@ -242,7 +242,8 @@ namespace SPListRepo{
 			});
 		}
 		
-		private _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : JQueryPromise<T[]>{
+		//NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
+		protected _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : JQueryPromise<T[]>{
 			querySettings = querySettings || new QuerySettings(ViewScope.FilesFolders);
 			
 			var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));
@@ -250,7 +251,7 @@ namespace SPListRepo{
 			return this._getItemsBySPCamlQuery(camlQuery);
 		}
 		
-		private _getViewQuery(camlExpression: CamlBuilder.IExpression, querySettings: QuerySettings) : CamlBuilder.IExpression{
+		protected _getViewQuery(camlExpression: CamlBuilder.IExpression, querySettings: QuerySettings) : CamlBuilder.IExpression{
 			var camlQuery;
 			var viewQuery = new CamlBuilder().View(querySettings.viewFields);
 			
@@ -296,7 +297,7 @@ namespace SPListRepo{
 			return camlQuery;
 		}
 		
-		private _getSPCamlQuery(viewXmlObject: CamlBuilder.IFinalizable): SP.CamlQuery{
+		protected _getSPCamlQuery(viewXmlObject: CamlBuilder.IFinalizable): SP.CamlQuery{
 			var viewQuery = viewXmlObject.ToString();
 			console.log("Running query:");
 			console.log(viewQuery);
@@ -305,7 +306,7 @@ namespace SPListRepo{
 			return query;
 		}
 		
-		private _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T[]>{
+		protected _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T[]>{
 			return this._withPromise<T[]>(deferred => {
 				if (this.folder) {
 					spCamlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
@@ -331,7 +332,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		private _getFolderRelativeUrl(folderName?: string) : string{
+		protected _getFolderRelativeUrl(folderName?: string) : string{
 			var folder = folderName || this.folder;
 
 			var listRootUrl = this._list.get_rootFolder().get_serverRelativeUrl();
@@ -340,11 +341,11 @@ namespace SPListRepo{
 			return String.format("{0}{1}", listRootUrl, folder);
 		}
 		
-		private _createDeferred<T>(){
+		protected _createDeferred<T>(){
 			return jQuery.Deferred<T>();
 		}
 		
-		private _withPromise<U>(callback: (deferred: JQueryDeferred<U>) => void): JQueryPromise<U>{
+		protected _withPromise<U>(callback: (deferred: JQueryDeferred<U>) => void): JQueryPromise<U>{
 			var deferred = this._createDeferred<U>();
 			this._loadListDeferred.done(() => {				
 				callback(deferred);

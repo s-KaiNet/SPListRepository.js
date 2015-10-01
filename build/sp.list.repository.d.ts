@@ -100,15 +100,15 @@ declare namespace SPListRepo {
         deleteItem(model: T): JQueryPromise<T>;
         createFolder(folderName: string): JQueryPromise<T>;
         createFile(url: string, content: string, overwrite: boolean): JQueryPromise<SP.File>;
-        private _getItemBySPCamlQuery(spCamlQuery);
-        private _addItem(model);
-        private _updateItem(model);
-        private _getItemsByExpression(camlExpression, querySettings?);
-        private _getViewQuery(camlExpression, querySettings);
-        private _getSPCamlQuery(viewXmlObject);
-        private _getItemsBySPCamlQuery(spCamlQuery);
-        private _getFolderRelativeUrl(folderName?);
-        private _createDeferred<T>();
-        private _withPromise<U>(callback);
+        protected _getItemBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T>;
+        protected _addItem(model: T): JQueryPromise<T>;
+        protected _updateItem(model: T): JQueryPromise<T>;
+        protected _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings): JQueryPromise<T[]>;
+        protected _getViewQuery(camlExpression: CamlBuilder.IExpression, querySettings: QuerySettings): CamlBuilder.IExpression;
+        protected _getSPCamlQuery(viewXmlObject: CamlBuilder.IFinalizable): SP.CamlQuery;
+        protected _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T[]>;
+        protected _getFolderRelativeUrl(folderName?: string): string;
+        protected _createDeferred<T>(): JQueryDeferred<T>;
+        protected _withPromise<U>(callback: (deferred: JQueryDeferred<U>) => void): JQueryPromise<U>;
     }
 }

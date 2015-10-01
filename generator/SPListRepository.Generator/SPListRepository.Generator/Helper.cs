@@ -111,6 +111,20 @@ namespace SPListRepository.Generator
 			return false;
 		}
 
+		public static bool IsFieldAcceptableToMapToListItem(Field field, GeneratorConfig config)
+		{
+			var baseFieldsToExclude = new[] { "_CopySource", "_CheckinComment", "LinkFilenameNoMenu", "LinkFilename", "DocIcon", "FileSizeDisplay",
+				"ItemChildCount", "FolderChildCount", "AppAuthor", "AppEditor", "Edit", "_UIVersionString", "ParentVersionString", "ParentLeafName",
+			"LinkTitleNoMenu", "LinkTitle", "ContentType"};
+
+			if (baseFieldsToExclude.ToList().Any(f => f.Equals(field.InternalName)))
+			{
+				return false ;
+			}
+
+			return IsFieldAcceptable(field, config);
+		}
+
 		public static bool IsFieldAcceptable(Field field, GeneratorConfig config)
 		{
 			var baseFieldsToExclude = new[] { "ID", "Modified", "Created", "Editor", "Author", "FSObjType", "Title", "FileLeafRef", "FileDirRef", "ContentTypeId" };

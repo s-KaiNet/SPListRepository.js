@@ -9,8 +9,8 @@ namespace SPListRepo{
 		static getListByUrl(listUrl: string):JQueryPromise<SP.List>{			
 			var loadDeferred = $.Deferred<SP.List>();
 			
-			var webAbsoluteUrl = SPListRepo.Helper.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
-			var webServerRelativeUrl = SPListRepo.Helper.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
+			var webAbsoluteUrl = Helper.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
+			var webServerRelativeUrl = Helper.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
 			var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
 			
 			var context = SP.ClientContext.get_current();
@@ -19,7 +19,7 @@ namespace SPListRepo{
 				loadDeferred.resolve(list);			
 			};
 			
-			var error = function(err:SPListRepo.RequestError){
+			var error = function(err:RequestError){
 				loadDeferred.reject(err);
 			};
 			
@@ -29,7 +29,7 @@ namespace SPListRepo{
 				context.executeQueryAsync(function(){
 					success(list);
 				}, function(sender, err) { 
-					error(new SPListRepo.RequestError(err));
+					error(new RequestError(err));
 				});
 			}else{						//Pre Feb.2015 CU - getList missing
 				ListService.getListUsingRest(url, success, error);
@@ -46,13 +46,13 @@ namespace SPListRepo{
 			context.executeQueryAsync(function(){
 				loadDeferred.resolve(list);
 			}, function(sender, err) { 
-				loadDeferred.reject(new SPListRepo.RequestError(err));
+				loadDeferred.reject(new RequestError(err));
 			});
 			
 			return loadDeferred.promise();
 		}
 		
-		private static getListUsingRest(url:string, success:(lsit:SP.List) => void, error: (err:SPListRepo.RequestError) => void){
+		private static getListUsingRest(url:string, success:(lsit:SP.List) => void, error: (err:RequestError) => void){
 			$.ajax({
 				url: url, 
 				type: "GET",
@@ -67,11 +67,11 @@ namespace SPListRepo{
 					context.executeQueryAsync(function(){
 						success(list);
 					}, function(sender, e){
-						error(new SPListRepo.RequestError(e));
+						error(new RequestError(e));
 					});
 				},
 				error: function(jqXHR, textStatus){
-					error(new SPListRepo.RequestError(textStatus));
+					error(new RequestError(textStatus));
 				}
 			});
 		}		

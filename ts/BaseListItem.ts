@@ -27,18 +27,18 @@ namespace SPListRepo{
 			this.spListItem = item;
 			this.file = this.spListItem.get_file();
 			this.id = item.get_id();
-			this.created = this.getFieldValue(SPListRepo.Fields.Created);
-			this.createdBy = this.getFieldValue(SPListRepo.Fields.CreatedBy);
-			this.modified = this.getFieldValue(SPListRepo.Fields.Modified);
-			this.modifiedBy = this.getFieldValue(SPListRepo.Fields.ModifiedBy);
-			this.title = this.getFieldValue(SPListRepo.Fields.Title);
-			this.fileDirRef = this.getFieldValue(SPListRepo.Fields.FileDirRef);
+			this.created = this.getFieldValue(Fields.Created);
+			this.createdBy = this.getFieldValue(Fields.CreatedBy);
+			this.modified = this.getFieldValue(Fields.Modified);
+			this.modifiedBy = this.getFieldValue(Fields.ModifiedBy);
+			this.title = this.getFieldValue(Fields.Title);
+			this.fileDirRef = this.getFieldValue(Fields.FileDirRef);
 			this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();	
 		}
 		
 		mapToListItem(item: SP.ListItem): void{
-			this.setFieldValue(item, SPListRepo.Fields.Title, this.title);
-			this.setFieldValue(item, SPListRepo.Fields.FileLeafRef, this.fileLeafRef);
+			this.setFieldValue(item, Fields.Title, this.title);
+			this.setFieldValue(item, Fields.FileLeafRef, this.fileLeafRef);
 		}
 		
 		protected getFieldValue(name:string): any{

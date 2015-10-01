@@ -1,4 +1,7 @@
-﻿namespace MyApp{
+﻿/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../build/sp.list.repository.d.ts" />
+
+namespace MyApp{
 	export class TestLIbBaseItem extends SPListRepo.BaseListItem{
 		testText: string;
 		testMultilineText: SP.FieldMultiLineText;
@@ -34,7 +37,7 @@
 
 		mapFromListItem(item: SP.ListItem): void{
 			super.mapFromListItem(item);
-			
+
 			this.testText = this.getFieldValue("TestText");
 			this.testMultilineText = this.getFieldValue("TestMultilineText");
 			this.testChoice = this.getFieldValue("TestChoice");
@@ -74,22 +77,7 @@
 			this.setFieldValue(item, "TestUserField", this.testUserField);
 			this.setFieldValue(item, "TestLilnk", this.testLilnk);
 			this.setFieldValue(item, "TestLookup", this.testLookup);
-			this.setFieldValue(item, "ContentType", this.contentType);
-			this.setFieldValue(item, "_CopySource", this._CopySource);
 			this.setFieldValue(item, "CheckoutUser", this.checkoutUser);
-			this.setFieldValue(item, "_CheckinComment", this._CheckinComment);
-			this.setFieldValue(item, "LinkFilenameNoMenu", this.linkFilenameNoMenu);
-			this.setFieldValue(item, "LinkFilename", this.linkFilename);
-			this.setFieldValue(item, "DocIcon", this.docIcon);
-			this.setFieldValue(item, "FileSizeDisplay", this.fileSizeDisplay);
-			this.setFieldValue(item, "ItemChildCount", this.itemChildCount);
-			this.setFieldValue(item, "FolderChildCount", this.folderChildCount);
-			this.setFieldValue(item, "AppAuthor", this.appAuthor);
-			this.setFieldValue(item, "AppEditor", this.appEditor);
-			this.setFieldValue(item, "Edit", this.edit);
-			this.setFieldValue(item, "_UIVersionString", this._UIVersionString);
-			this.setFieldValue(item, "ParentVersionString", this.parentVersionString);
-			this.setFieldValue(item, "ParentLeafName", this.parentLeafName);
 		}
 	}
 }

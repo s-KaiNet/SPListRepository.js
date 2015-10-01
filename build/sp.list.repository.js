@@ -260,6 +260,10 @@ var SPListRepo;
                 });
             });
         };
+        ListRepository.prototype.getItemsByTitle = function(title, querySettings) {
+            var camlExpression = CamlBuilder.Expression().TextField("Title").EqualTo(title);
+            return this._getItemsByExpression(camlExpression, querySettings);
+        };
         ListRepository.prototype.getItemsByIds = function(ids, querySettings) {
             var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).In(ids);
             return this._getItemsByExpression(camlExpression, querySettings);
@@ -275,17 +279,31 @@ var SPListRepo;
             }));
             return this._getItemsByExpression(camlExpression, querySettings);
         };
-        ListRepository.prototype.getLastAddedItem = function(querySettings) {
+        ListRepository.prototype.getLastAddedItem = function(viewFields, recursive) {
+            if (recursive === void 0) {
+                recursive = false;
+            }
             var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0);
-            querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
-            querySettings.rowLimit = 1;
+            var querySettings;
+            if (recursive) {
+                querySettings = new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnlyRecursive, viewFields, 1);
+            } else {
+                querySettings = new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnly, viewFields, 1);
+            }
             var query = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings).OrderByDesc(SPListRepo.Fields.ID));
             return this._getItemBySPCamlQuery(query);
         };
-        ListRepository.prototype.getLastModifiedItem = function(querySettings) {
+        ListRepository.prototype.getLastModifiedItem = function(viewFields, recursive) {
+            if (recursive === void 0) {
+                recursive = false;
+            }
             var camlExpression = CamlBuilder.Expression().CounterField(SPListRepo.Fields.ID).NotEqualTo(0);
-            querySettings = querySettings || new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesFolders);
-            querySettings.rowLimit = 1;
+            var querySettings;
+            if (recursive) {
+                querySettings = new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnlyRecursive, viewFields, 1);
+            } else {
+                querySettings = new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnly, viewFields, 1);
+            }
             var query = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings).OrderByDesc(SPListRepo.Fields.Modified));
             return this._getItemBySPCamlQuery(query);
         };
@@ -317,9 +335,11 @@ var SPListRepo;
                 var folderItem = _this._list.addItem(folder);
                 folderItem.set_item("Title", folderName);
                 folderItem.update();
+                var self = _this;
                 _this._context.load(folderItem);
                 _this._context.executeQueryAsync(function() {
-                    deferred.resolve(folderItem);
+                    var resultItem = new self._listItemConstructor(folderItem);
+                    deferred.resolve(resultItem);
                 }, function(sender, error) {
                     deferred.reject(new SPListRepo.RequestError(error));
                 });

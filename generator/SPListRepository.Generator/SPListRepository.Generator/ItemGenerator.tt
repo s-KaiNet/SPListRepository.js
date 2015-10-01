@@ -71,7 +71,7 @@ namespace <#=config.Namespace#>{
 
 <#				foreach(Field field in fields)
 				{
-					if(Helper.IsFieldAcceptable(field, config))
+					if(Helper.IsFieldAcceptable(field, config) )
 					{
 #>			this.<#=Helper.LowerCaseFirstLetter(field.InternalName) #> = this.getFieldValue("<#=field.InternalName#>");
 <#
@@ -87,7 +87,7 @@ namespace <#=config.Namespace#>{
 		
 				foreach(Field field in fields)
 				{
-					if(Helper.IsFieldAcceptable(field, config))
+					if(Helper.IsFieldAcceptableToMapToListItem(field, config))
 					{
 #>
 			this.setFieldValue(item, "<#=field.InternalName#>", this.<#=Helper.LowerCaseFirstLetter(field.InternalName)#>);

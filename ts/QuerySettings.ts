@@ -4,11 +4,11 @@
 namespace SPListRepo{
 		
 	export class QuerySettings {
-		viewScope: SPListRepo.ViewScope;
+		viewScope: ViewScope;
 		viewFields: string[];
 		rowLimit: number;
 		
-		constructor(viewScope?: SPListRepo.ViewScope, viewFields?: string[], rowLimit?: number){	
+		constructor(viewScope?: ViewScope, viewFields?: string[], rowLimit?: number){	
 			this.viewScope = viewScope;
 			this.viewFields = viewFields;
 			this.rowLimit = rowLimit;	

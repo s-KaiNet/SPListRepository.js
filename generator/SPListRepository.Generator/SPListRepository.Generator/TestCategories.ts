@@ -38,16 +38,6 @@ namespace MyApp{
 		mapToListItem(item: SP.ListItem): void{
 			super.mapToListItem(item);
 
-			this.setFieldValue(item, "ContentType", this.contentType);
-			this.setFieldValue(item, "_UIVersionString", this._UIVersionString);
-			this.setFieldValue(item, "Edit", this.edit);
-			this.setFieldValue(item, "LinkTitleNoMenu", this.linkTitleNoMenu);
-			this.setFieldValue(item, "LinkTitle", this.linkTitle);
-			this.setFieldValue(item, "DocIcon", this.docIcon);
-			this.setFieldValue(item, "ItemChildCount", this.itemChildCount);
-			this.setFieldValue(item, "FolderChildCount", this.folderChildCount);
-			this.setFieldValue(item, "AppAuthor", this.appAuthor);
-			this.setFieldValue(item, "AppEditor", this.appEditor);
 		}
 	}
 }

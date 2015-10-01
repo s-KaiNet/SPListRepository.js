@@ -72,10 +72,10 @@ declare namespace SPListRepo {
 }
 declare namespace SPListRepo {
     class QuerySettings {
-        viewScope: SPListRepo.ViewScope;
+        viewScope: ViewScope;
         viewFields: string[];
         rowLimit: number;
-        constructor(viewScope?: SPListRepo.ViewScope, viewFields?: string[], rowLimit?: number);
+        constructor(viewScope?: ViewScope, viewFields?: string[], rowLimit?: number);
     }
 }
 declare namespace SPListRepo {
@@ -89,15 +89,16 @@ declare namespace SPListRepo {
         private _listItemConstructor;
         folder: string;
         constructor(listUrlOrId: string | SP.Guid, listItemConstructor: IBaseItemConstruct<T>);
-        getItems(querySettings: SPListRepo.QuerySettings): JQueryPromise<T[]>;
+        getItems(querySettings?: QuerySettings): JQueryPromise<T[]>;
         getItemById(id: number): JQueryPromise<T>;
-        getItemsByIds(ids: number[], querySettings: SPListRepo.QuerySettings): JQueryPromise<T[]>;
-        getItemsInsideFolders(folderNames: string[], querySettings: SPListRepo.QuerySettings): JQueryPromise<T[]>;
-        getLastAddedItem(querySettings: SPListRepo.QuerySettings): JQueryPromise<T>;
-        getLastModifiedItem(querySettings: SPListRepo.QuerySettings): JQueryPromise<T>;
+        getItemsByTitle(title: string, querySettings?: QuerySettings): JQueryPromise<T[]>;
+        getItemsByIds(ids: number[], querySettings?: QuerySettings): JQueryPromise<T[]>;
+        getItemsInsideFolders(folderNames: string[], querySettings?: QuerySettings): JQueryPromise<T[]>;
+        getLastAddedItem(viewFields?: string[], recursive?: boolean): JQueryPromise<T>;
+        getLastModifiedItem(viewFields?: string[], recursive?: boolean): JQueryPromise<T>;
         saveItem(model: T): JQueryPromise<T>;
         deleteItem(model: T): JQueryPromise<T>;
-        createFolder(folderName: string): JQueryPromise<SP.ListItem>;
+        createFolder(folderName: string): JQueryPromise<T>;
         createFile(url: string, content: string, overwrite: boolean): JQueryPromise<SP.File>;
         private _getItemBySPCamlQuery(spCamlQuery);
         private _addItem(model);

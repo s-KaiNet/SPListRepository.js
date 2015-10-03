@@ -86,10 +86,12 @@ gulp.task("spsave", function(){
 gulp.task("nuget", function(){
 	return gulp.src(["build/sp.list.repository.min.js", "build/sp.list.repository.d.ts"])
   				.pipe(gulp.dest("NuGet/content/Scripts"));
-})
+});
+
+gulp.task("build", function() {
+	runSequence("ts", "js-dev", ["ts-def", "spsave"], "nuget");
+});
 
 gulp.task("watch", function () {
-	gulp.watch(["ts/**/*.ts"], function(){
-		runSequence("ts", "js-dev", ["ts-def", "spsave"], "nuget");
-	});
+	gulp.watch(["ts/**/*.ts"], "build");
 });

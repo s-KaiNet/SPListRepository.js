@@ -83,10 +83,10 @@ declare namespace SPListRepo {
         new (item?: SP.ListItem): T;
     }
     class ListRepository<T extends BaseListItem> {
-        private _context;
-        private _loadListDeferred;
-        private _list;
-        private _listItemConstructor;
+        protected _context: SP.ClientContext;
+        protected _loadListDeferred: JQueryPromise<SP.List>;
+        protected _list: SP.List;
+        protected _listItemConstructor: IBaseItemConstruct<T>;
         folder: string;
         constructor(listUrlOrId: string | SP.Guid, listItemConstructor: IBaseItemConstruct<T>);
         getItems(querySettings?: QuerySettings): JQueryPromise<T[]>;

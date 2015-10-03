@@ -1,7 +1,5 @@
 # SPListRepository.js
-Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model. Tested with SharePoint 2013 and SharePoint Online.
-
-Main file is `js\build\release\sp.list.repository.min.js `
+Repository pattern implementation in TypeScript for convenient list data access through the SharePoint JavaScript client object model. Tested with SharePoint 2013 and SharePoint Online.
 
 ###NuGet: 
 ```
@@ -12,9 +10,16 @@ Install-Package SPListRepository.js
 bower install SPListRepository.js
 ```  
 
-How to run\build:   
-1. Clone the repository  
-2. Run `grunt release` for release or `grunt dev` for development.
+###Development: 
+1. Clone the repository.
+2. Restore dependencies `npm install`
+2. Run `gulp build` for building javascript in one file and generating typescript schema. 
+3. Run `gulp watch` to automatically build. 
+
+###Test:
+1. Install jasmine globally - `npm install jasmine -g`
+2. Create two lists in SharePoint from template (`tests\data\TestLib.stp` and `tests\data\TestCategories.stp`)
+3. Run gulp tests. 
 
 Currently project has following dependencies:   
 
@@ -24,7 +29,8 @@ Currently project has following dependencies:
 
 `SPListRepository.js` provides base classes for working with SharePoint JavaScript client object model.   
 
-Base classes include: 
+Base classes include:   
+---
 
 ###`SPListRepo.ViewScope` enumeration:
 Contains scope values related to SP CAML query operations. All operations by default will be limited to one of this scopes:  
@@ -43,241 +49,185 @@ Contains scope values related to SP CAML query operations. All operations by def
  - `rowLimit` - optional, RowLimit SPQuery parameter
 
 ### `SPListRepo.ListRepository` class:
-#####Constructor: `ListRepository(listUrl, listItemConstructor)`
-- `listUrl` - required, list relative url, for example `Lists/News`
-- `listItemConstructor` - required, constructor function for item object  
+#####Constructor: `constructor(listUrlOrId: string|SP.Guid, listItemConstructor: IBaseItemConstruct<T>)`
+- `listUrlOrId` - required, list relative url, for example `Lists/News` or list id
+- `listItemConstructor` - required, constructor function for item object (see samples below)
 
 #####Property: `folder`
-When folder property is instantiated, then all CAML query-related operation on list will be relateive to this folder. For subfolders use `RootFolderName/SubFolderName`. Corresponds to `folderServerRelativeUrl` property on `SP.CamlQuery` object. 
-#####Method: `getItems(querySettings)`
+When folder property is instantiated, then all CAML query-related operation on list will be relative to this folder. For subfolders use `RootFolderName/SubFolderName`. Corresponds to `folderServerRelativeUrl` property on `SP.CamlQuery` object. 
+#####Method: `getItems(querySettings?: QuerySettings): JQueryPromise<T[]>`
 Returns all items using specified query settings. 
 
 - `querySettings` - optional, `SPListRepo.QuerySettings` object
 
-#####Method: `getItemById(id)`
+#####Method: `getItemById(id: number): JQueryPromise<T>`
 Returns item by its Id. 
 
 - `id` - required number, Id of the item
 
-#####Method: `getItemsByIds(ids, querySettings) `
+#####Method: `getItemsByIds(ids: number[], querySettings?: QuerySettings): JQueryPromise<T[]>`
 Returns items by their Ids.  
-
-
 - `ids` - required, array of items' Ids  
 - `querySettings` - optional, `SPListRepo.QuerySettings` object  
 
-#####Method: `getItemsInsideFolders(folderNames, querySettings)`
+#####Method: `getItemsByTitle(title: string, querySettings?: QuerySettings): JQueryPromise<T[]>`
+Returns items by title.  
+- `title` - required, title field value  
+- `querySettings` - optional, `SPListRepo.QuerySettings` object  
+
+#####Method: `getItemsInsideFolders(folderNames: string[], querySettings?: QuerySettings): JQueryPromise<T[]>`
 Returns items inside specified folders.
 - `folderNames` - required, string array of folder names, for sub folders use `RootFolderName/Subfolder`
 - `querySettings` - optional, `SPListRepo.QuerySettings` object  
 
-#####Method: `getLastAddedItem(querySettings)`
+#####Method: `getLastAddedItem(viewFields?: string[], recursive: boolean = false): JQueryPromise<T>`
 Returns last added item. Depending on `querySettings` and `folder` property may return item from the entire list or from the specified folder.  
 
-- `querySettings` - optional, `SPListRepo.QuerySettings` object  
+- `viewFields` - optional, string array of view fields for the CamlQuery
+- `recursive` - optional, default `false`, to look into subfolders or not  
 
-#####Method: `getLastModifiedItem(querySettings)`
+#####Method: `getLastModifiedItem(viewFields?: string[], recursive: boolean = false): JQueryPromise<T>`
 Returns last modified item. Depending on querySettings and folder property may return item from the entire list or from the specified folder.  
 
-- `querySettings` - optional, `SPListRepo.QuerySettings` object 
+- `viewFields` - optional, string array of view fields for the CamlQuery
+- `recursive` - optional, default `false`, to look into subfolders or not 
 
-#####Method: `saveItem(model)`
+#####Method: `saveItem(model: T) : JQueryPromise<T>`
 Saves item in SharePoint. If model.id is specified item will be updated, otherwise item will be added.  
 
  - `model` - required, object that was created using `listItemConstructor` constructor function that you specified for list repository constructor  
  
-#####Method: `deleteItem(model) ` 
+#####Method: `deleteItem(model: T) : JQueryPromise<T>` 
 Deletes item. 
 
  - `model` - required, object that was created using `listItemConstructor` constructor function that you specified for list repository constructor   
 
-#####Method: `createFolder(folderName)`
+#####Method: `createFolder(folderName: string): JQueryPromise<T>`
 Creates folder.  
 
  - `folderName` - required, string name. For sub folder use `RootFolderName/SubFolder` (`RootFolderName` should exists)
 
-#####Method: `createFile(url, content, overwrite)`
+#####Method: `createFile(url: string, content: string, overwrite: boolean): JQueryPromise<SP.File>`
 Creates file. If you want to save a file inside folder, you should provide `folder` property for list repository object (for example `folder = "MyFolder"`), otherwise it will be saved in a root folder of the list.  
 
 - `url` - required, file url. Urls as `my/file.txt` are not allowed. Valid urls are actually file names, i.e. `file.txt`
 - `content` - required, string file content
 - `overwrite` - required bool, should we overwrite the existing file
 
-##Sample using
+Sample using
+---
 
-For example you have a News list (`Lists/News` url). The list contains following fields:   
+For generating your model classes you can use [Model Generator](https://github.com/s-KaiNet/SPListRepository.js/tree/master/generator/SPListRepository.Generator). It uses T4 to generate your typescript model classes from SharePoint using config `sp.list.repository.config.json`. It works for both SharePoint Online and on premise.
+Config file format for generator:   
 
- - `Title`, text
- - `Body`, rich text
- - `Category`, lookup
- - `Published`, date
- - `Original_x0020_Source`, url
+```json
+{
+	"siteUrl": "http://sp2013dev/sites/dev",
+	"namespace": "MyApp",
+	"creds": {
+		"username": "sp\\administrator",
+		"password": "QazWsx123"
+	},
+	"lists": {
+		"all": true,
+		"excludeHidden": true
+		"include": ["Lists/TestCategories", "TestLIb"],
+		"exclude": ["Lists/MyList"]
+	},
+	"fields": {
+		"all": true,
+		"excludeHidden": true,
+		"include": ["Field1", "Field2"],
+		"exclude": ["Field2"]
+	}
+}
 
-List structure:   
+```  
+  
+ - `siteUrl` - your site collection url where lists are located
+ - `namespace` - namespace for your app
+ - `creds` - credentials 
+ - `lists` - lists node (you can provide excursively `include` or combination of `all`, `excludeHidden` and `exclude`): 
+	 - `all` - will generate classes for all lists under siteUrl
+	 - `excludeHidden` - will ignore hidden lists
+	 - `exclude` - will ignore lists by leaf url
+	 - `include` - only this lists will be included
 
- - Root folders - names of the years, i.e. 2014, 2015, ...
- - Sub folders - month names, January, February, March, ...
- - news for March, 2015 are inside 2015/March folder
+ - `fields` - fields node (you can provide excursively `include` or combination of `all`, `excludeHidden` and `exclude`): 
+	 - `all` - will generate properties for all fields for the list
+	 - `excludeHidden` - will ignore hidden fields
+	 - `exclude` - will ignore this fields
+	 - `include` - only this fileds as properties will be included   
 
-You need to query top 5 news for March, 2015 using `SPListRepository.js.`  
 
-1) Create class that will represent your news item and inherit it from `SPListRepo.BaseListItem`:   
+Samples:   
+---  
 
-```javascript
-var MyApp = MyApp || {};
+You can explore `spec.ts` file for sample using.   
+Sample model class generated by TestCategories list: 
 
-MyApp.NewsListItem = 
-(function(){
-	"use strict";
-	
-	function NewsListItem(item) {
-		if (item) {
-			NewsListItem.initializeBase(this, [item]);
-	
-			this.body = this.getFieldValue("Body");
-			this.category = this.getFieldValue("Category");
-			this.published = this.getFieldValue("Published");
-			this.originalSource = this.getFieldValue("Original_x0020_Source");
+```javascript  
+namespace MyApp{
+	export class TestCategoriesBaseItem extends SPListRepo.BaseListItem{
+		contentType: string;
+		_UIVersionString: string;
+		edit: string;
+		linkTitleNoMenu: string;
+		linkTitle: string;
+		docIcon: string;
+		itemChildCount: SP.FieldLookupValue;
+		folderChildCount: SP.FieldLookupValue;
+		appAuthor: SP.FieldLookupValue;
+		appEditor: SP.FieldLookupValue;
+		constructor(item?: SP.ListItem){
+			super(item);
+			if(item){
+				this.mapFromListItem(item);
+			}
+		}
+
+		mapFromListItem(item: SP.ListItem): void{
+			super.mapFromListItem(item);
+
+			this.contentType = this.getFieldValue("ContentType");
+			this._UIVersionString = this.getFieldValue("_UIVersionString");
+			this.edit = this.getFieldValue("Edit");
+			this.linkTitleNoMenu = this.getFieldValue("LinkTitleNoMenu");
+			this.linkTitle = this.getFieldValue("LinkTitle");
+			this.docIcon = this.getFieldValue("DocIcon");
+			this.itemChildCount = this.getFieldValue("ItemChildCount");
+			this.folderChildCount = this.getFieldValue("FolderChildCount");
+			this.appAuthor = this.getFieldValue("AppAuthor");
+			this.appEditor = this.getFieldValue("AppEditor");
+		}
+
+		mapToListItem(item: SP.ListItem): void{
+			super.mapToListItem(item);
+
 		}
 	}
-	
-	return NewsListItem;
-})();
-
-MyApp.NewsListItem.registerClass("MyApp.NewsListItem", SPListRepo.BaseListItem);
-
-```  
-
-`item` parameter is SP.ListItem object, it is optional  
-
-```javascript
-NewsListItem.initializeBase(this, [item]);
-```
-Call base method in order to initialize some base properties like `title`, `created`, `modified` and others.  
-   
-```javascript
-this.body = this.getFieldValue("Body");
-```
-Initialize other fields specific to your list.   
-
-```javascript
-MyApp.NewsListItem.registerClass("MyApp.NewsListItem", SPListRepo.BaseListItem);
-```
-
-Register class and inherit it from the base `SPListRepo.BaseListItem`  
-
- 2) Create NewsRepository inherited from `SPListRepo.ListRepository`. Add required methods to your repository.   
-
-
-```javascript
-MyApp.NewsRepository = 
-(function(){
-	"use strict";
-	
-	function NewsRepository(listUrl) {
-	    NewsRepository.initializeBase(this, [listUrl, MyApp.NewsListItem]);
+}
+```   
+and repository:   
+```javascript  
+class TestCategoryRepo extends SPListRepo.ListRepository<MyApp.TestCategoriesBaseItem>{
+	constructor();
+	constructor(id?: SP.Guid){
+		if(id){
+			super(id, MyApp.TestCategoriesBaseItem);
+		} else{
+			super("Lists/TestCategories", MyApp.TestCategoriesBaseItem)
+		}
 	}
-	
-	NewsRepository.prototype = {
-	    _setFieldValues: function (item, model) {
-	        NewsRepository.callBaseMethod(this, "_setFieldValues", [item, model]);
-	
-	        item.set_item("Body", model.body);
-	        item.set_item("Category", model.category);
-			item.set_item("Published", model.published);
-			item.set_item("Original_x0020_Source", model.originalSource);
-	    },
-	
-	    getRecentNewsByCategory: function (categoryId, querySettings) {
-	        var camlExpression = CamlBuilder.Expression().LookupField("Category").Id().EqualTo(categoryId);
-	        
-	        var viewQuery = this._getViewQuery(camlExpression, querySettings);
-	        var query = this._getSPCamlQuery(viewQuery.OrderByDesc(SPListRepo.Fields.Modified));
-
-			return this._getItemsBySPCamlQuery(query);
-	    },
-	};
-	
-	return NewsRepository;
-})();
-
-
-MyApp.NewsRepository.registerClass("MyApp.NewsRepository", SPListRepo.ListRepository);
-
-```   
-
-```javascript
-NewsRepository.initializeBase(this, [listUrl, MyApp.NewsListItem]);
-```
-Call base constructor and pass list item constrution function to it.  
-
-```javascript
-_setFieldValues: function (item, model) {
-    NewsRepository.callBaseMethod(this, "_setFieldValues", [item, model]);
-
-    item.set_item("Body", model.body);
-	.....
-},
-
-```  
-This method overload is required if you are going to save your items. In this method you should provide mapping between your model (`MyApp.NewsListItem` object) and `SP.ListItem` object.   
-
-```javascript
-getRecentNewsByCategory: function (categoryId, querySettings)
-```
-Methods that returns news by `categoryId` and depending on `querySettings`.  
-
-```javascript
-MyApp.NewsRepository.registerClass("MyApp.NewsRepository", SPListRepo.ListRepository);
-```   
-Register repository class inherited from `SPListRepo.ListRepository`.   
-####Using: 
-Create repository:  
-
-```javascript
-ExecuteOrDelayUntilScriptLoaded(function(){
-	var newsRepository = new MyApp.NewsRepository("Lists/News");  
-	.........
-},"sp.js");
-```    
-
-Get top 5 news from March: 
-
-```javascript
-newsRepository.folder = "2015/March";
-newsRepository.getRecentNewsByCategory(2, new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnly, ["Title", "Body", "Category"], 5)).done(function(newsItems){
-//work with newsItems - instanses of MyApp.NewsListItem
-});
+}
 ```  
 
-Get top 20 news from 2015:  
+Get items from TestCategories list with title `'MyCategory'`: 
 
-```javascript
-newsRepository.folder = "2015";
-newsRepository.getRecentNewsByCategory(2, new SPListRepo.QuerySettings(SPListRepo.ViewScope.FilesOnlyRecursive, ["Title", "Body", "Category"], 20))
-``` 
-
-
-Save and delete item:  
-
-```javascript
-var newItem = new MyApp.NewsListItem();
-newItem.category = new SP.FieldLookupValue();
-newItem.category.set_lookupId(1);
-newItem.body = "<h2>Breaking News!!!</h2>";
-newItem.Published = new Date();
-newItem.originalSource = new SP.FieldUrlValue();
-newItem.originalSource.set_url("http://some.cool.site.com");
-newItem.originalSource.set_description("test link");
-
-newsRepository.saveItem(newItem).done(function(savedItem){
-	console.log("item saved:");
-	console.log(savedItem);
-	console.log("Item id: " + savedItem.id);
-	newsRepository.deleteItem(savedItem).done(function(){
-		console.log("Deleted!");
-	});
-});
-
-```    
-
+```javascript  
+var testCategoryRepo = new TestCategoryRepo();
+testLibRepo.getItemsByTitle("doc1").done(items => {
+	//do actions with items which are instances of TestCategoriesBaseItem
+	
+})
+```

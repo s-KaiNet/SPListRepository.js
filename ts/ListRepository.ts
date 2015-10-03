@@ -12,10 +12,10 @@ namespace SPListRepo{
 	}
 	
 	export class ListRepository<T extends BaseListItem>{
-		private _context: SP.ClientContext;
-		private _loadListDeferred: JQueryPromise<SP.List>; 
-		private _list: SP.List;
-		private _listItemConstructor: IBaseItemConstruct<T>;
+		protected _context: SP.ClientContext;
+		protected _loadListDeferred: JQueryPromise<SP.List>; 
+		protected _list: SP.List;
+		protected _listItemConstructor: IBaseItemConstruct<T>;
 		
 		folder: string;
 		

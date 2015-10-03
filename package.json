@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git://github.com/s-KaiNet/SPListRepository.js"
   },
-  "main": "js/build/release/sp.list.repository.min.js",
+  "main": ["build/sp.list.repository.min.js", "build/sp.list.repository.d.ts"],
   "licenses": [
     {
       "type": "MIT",
@@ -24,7 +24,7 @@
     "gulp": "^3.9.0",
     "gulp-beautify": "^1.1.2",
     "gulp-concat": "^2.6.0",
-    "gulp-jasmine-inject": "~1.0.1",
+    "gulp-jasmine-inject": "^1.0.0",
     "gulp-jsbeautifier": "^1.0.1",
     "gulp-load-plugins": "^1.0.0-rc.1",
     "gulp-phantom": "0.0.6",

@@ -230,4 +230,6 @@ testLibRepo.getItemsByTitle("doc1").done(items => {
 	//do actions with items which are instances of TestCategoriesBaseItem
 	
 })
-```
+```  
+
+You can extend `TestCategoryRepo` with any methods you need using base method from `ListRepository`. 

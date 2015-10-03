@@ -1,0 +1,108 @@
+﻿<#@ template  debug="true" hostSpecific="true" #>
+<#@ output extension="/" #>
+<#@ include file="$(SolutionDir)external\TemplateFileManagerV2.1.ttinclude" #>
+<#@ assembly name="$(SolutionDir)packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll" #>
+<#@ assembly name="$(SolutionDir)packages\Microsoft.SharePointOnline.CSOM.16.1.3912.1204\lib\net45\Microsoft.SharePoint.Client.Runtime.dll" #>
+<#@ assembly name="$(SolutionDir)packages\Microsoft.SharePointOnline.CSOM.16.1.3912.1204\lib\net45\Microsoft.SharePoint.Client.dll" #>
+<#@ Assembly name="$(SolutionDir)SPListRepository.Generator\bin\Debug\SPListRepository.Generator.exe" #>
+<#@ Assembly Name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Security" #>
+<#@ import namespace="System.Net" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Newtonsoft.Json" #>
+<#@ import namespace="SPListRepository.Generator" #>
+<#@ import namespace="Microsoft.SharePoint.Client" #>
+<#
+	var absolutePath = Host.ResolvePath("sp.list.repository.config.json");
+	var configString = System.IO.File.ReadAllText(absolutePath);
+
+
+	var manager = TemplateFileManager.Create(this);
+	
+	var config = JsonConvert.DeserializeObject<SPListRepository.Generator.GeneratorConfig>(configString);
+	Helper.CheckSchemaConsistency(config);
+
+	using(var ctx = Helper.CreateContext(config))
+	{
+		var lists = ctx.Web.Lists;
+
+		ctx.Load(lists, l =>  l.Include(r => r.RootFolder, r => r.Hidden, r => r.Title));
+		ctx.ExecuteQuery();
+
+		foreach (List list in lists)
+		{
+			if(Helper.IsListAcceptable(list, config))
+			{
+				var listTitleFixed = list.Title.Replace(" ", string.Empty);
+				manager.StartNewFile(listTitleFixed + ".ts");
+				var fields = list.Fields;
+				ctx.Load(fields);
+				ctx.ExecuteQuery();
+#>
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../build/sp.list.repository.d.ts" />
+
+namespace <#=config.Namespace#>{
+	export class <#=listTitleFixed#>BaseItem extends SPListRepo.BaseListItem{
+<#
+				foreach(Field field in fields)
+				{
+					if(Helper.IsFieldAcceptable(field, config))
+					{
+#>		<#=Helper.LowerCaseFirstLetter(field.InternalName) #>: <#=Helper.GetTypeStringByFieldType(field)#>;
+<#
+					}
+				}	
+	#>
+		constructor(item?: SP.ListItem){
+			super(item);
+			if(item){
+				this.mapFromListItem(item);
+			}
+		}
+
+		mapFromListItem(item: SP.ListItem): void{
+			super.mapFromListItem(item);
+
+<#				foreach(Field field in fields)
+				{
+					if(Helper.IsFieldAcceptable(field, config) )
+					{
+#>			this.<#=Helper.LowerCaseFirstLetter(field.InternalName) #> = this.getFieldValue("<#=field.InternalName#>");
+<#
+					}
+				}
+#>
+		}
+
+		mapToListItem(item: SP.ListItem): void{
+			super.mapToListItem(item);
+
+<#
+		
+				foreach(Field field in fields)
+				{
+					if(Helper.IsFieldAcceptableToMapToListItem(field, config))
+					{
+#>
+			this.setFieldValue(item, "<#=field.InternalName#>", this.<#=Helper.LowerCaseFirstLetter(field.InternalName)#>);
+<#
+					}
+				}
+#>		}
+	}
+<#
+#>}<#
+
+				manager.EndBlock();
+			}
+		}
+	}
+
+	manager.Process();
+ #>

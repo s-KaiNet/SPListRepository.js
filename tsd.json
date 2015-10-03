@@ -1,0 +1,24 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "jasmine/jasmine.d.ts": {
+      "commit": "54f064352a3615443f7bff4198078db15e28247b"
+    },
+    "camljs/camljs.d.ts": {
+      "commit": "54f064352a3615443f7bff4198078db15e28247b"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "54f064352a3615443f7bff4198078db15e28247b"
+    },
+    "microsoft-ajax/microsoft.ajax.d.ts": {
+      "commit": "54f064352a3615443f7bff4198078db15e28247b"
+    },
+    "sharepoint/SharePoint.d.ts": {
+      "commit": "54f064352a3615443f7bff4198078db15e28247b"
+    }
+  }
+}

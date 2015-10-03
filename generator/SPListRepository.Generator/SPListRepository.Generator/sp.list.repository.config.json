@@ -1,0 +1,15 @@
+﻿{
+	"siteUrl": "http://sp2013dev/sites/dev",
+	"namespace": "MyApp",
+	"creds": {
+		"username": "sp\\administrator",
+		"password": "QazWsx123"
+	},
+	"lists": {
+		"include": ["Lists/TestCategories", "TestLIb"]
+	},
+	"fields": {
+		"all": true,
+		"excludeHidden": true
+	}
+}

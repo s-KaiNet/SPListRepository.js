@@ -1,0 +1,38 @@
+{
+  "name": "SPListRepository.js",
+  "description": "Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model.",
+  "version": "2.0.0",
+  "author": {
+    "name": "s-KaiNet",
+    "url": "https://github.com/s-KaiNet"
+  },
+  "bugs": {
+    "url": "https://github.com/s-KaiNet/SPListRepository.js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/s-KaiNet/SPListRepository.js"
+  },
+  "main": "js/build/release/sp.list.repository.min.js",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ],
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-beautify": "^1.1.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-jasmine-inject": "~1.0.1",
+    "gulp-jsbeautifier": "^1.0.1",
+    "gulp-load-plugins": "^1.0.0-rc.1",
+    "gulp-phantom": "0.0.6",
+    "gulp-rename": "^1.2.2",
+    "gulp-spsave": "^1.0.0",
+    "gulp-typescript": "^2.8.3",
+    "gulp-uglify": "^1.4.1",
+    "run-sequence": "^1.1.4",
+    "tsd": "^0.6.4"
+  }
+}

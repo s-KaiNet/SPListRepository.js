@@ -33,7 +33,7 @@ namespace SPListRepo{
 			this.modifiedBy = this.getFieldValue(Fields.ModifiedBy);
 			this.title = this.getFieldValue(Fields.Title);
 			this.fileDirRef = this.getFieldValue(Fields.FileDirRef);
-			this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();	
+			this.fileSystemObjectType = this.spListItem.get_fileSystemObjectType();
 		}
 		
 		mapToListItem(item: SP.ListItem): void{

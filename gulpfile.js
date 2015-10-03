@@ -78,14 +78,18 @@ gulp.task("tests", ["ts-tests"], function(){
 		.pipe(gulp.dest("tests/test_results"));
 });
 
-gulp.task("spsave", ["js-dev"], function(){
+gulp.task("spsave", function(){
     return gulp.src("./build/*.js")
         .pipe($.spsave(sett));
 });
 
+gulp.task("nuget", function(){
+	return gulp.src(["build/sp.list.repository.min.js", "build/sp.list.repository.d.ts"])
+  				.pipe(gulp.dest("NuGet/content/Scripts"));
+})
+
 gulp.task("watch", function () {
-	//gulp.watch(["ts/**/*.ts"], ["ts", "ts-def", "js-dev", "spsave"]);
 	gulp.watch(["ts/**/*.ts"], function(){
-		runSequence("ts", "js-dev", ["ts-def", "spsave"]);
+		runSequence("ts", "js-dev", ["ts-def", "spsave"], "nuget");
 	});
 });

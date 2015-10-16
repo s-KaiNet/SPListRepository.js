@@ -105,7 +105,12 @@ namespace SPListRepository.Generator
 
 			if (config.Lists.Include.Count > 0)
 			{
-				return config.Lists.Include.Any(url => list.RootFolder.ServerRelativeUrl.IndexOf(url, StringComparison.OrdinalIgnoreCase) != -1);
+				list.Context.Load(list.ParentWeb, w => w.ServerRelativeUrl);
+				list.Context.ExecuteQuery();
+				var siteRelativeUrl = list.ParentWeb.ServerRelativeUrl;
+				siteRelativeUrl = siteRelativeUrl.EndsWith("/") ? siteRelativeUrl : siteRelativeUrl + "/";
+				var listWebRelativeUrl = list.RootFolder.ServerRelativeUrl.Replace(siteRelativeUrl, string.Empty);
+				return config.Lists.Include.Any(url => listWebRelativeUrl.IndexOf(url, StringComparison.OrdinalIgnoreCase) != -1);
 			}
 
 			return false;

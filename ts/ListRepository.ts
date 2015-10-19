@@ -251,6 +251,15 @@ namespace SPListRepo{
 			return this._getItemsBySPCamlQuery(camlQuery);
 		}
 		
+		//NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
+		protected _getItemByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : JQueryPromise<T>{
+			querySettings = querySettings || new QuerySettings(ViewScope.FilesFolders);
+			
+			var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));
+			
+			return this._getItemBySPCamlQuery(camlQuery);
+		}
+		
 		protected _getViewQuery(camlExpression: CamlBuilder.IExpression, querySettings: QuerySettings) : CamlBuilder.IExpression{
 			var camlQuery;
 			var viewQuery = new CamlBuilder().View(querySettings.viewFields);

@@ -104,6 +104,7 @@ declare namespace SPListRepo {
         protected _addItem(model: T): JQueryPromise<T>;
         protected _updateItem(model: T): JQueryPromise<T>;
         protected _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings): JQueryPromise<T[]>;
+        protected _getItemByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings): JQueryPromise<T>;
         protected _getViewQuery(camlExpression: CamlBuilder.IExpression, querySettings: QuerySettings): CamlBuilder.IExpression;
         protected _getSPCamlQuery(viewXmlObject: CamlBuilder.IFinalizable): SP.CamlQuery;
         protected _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T[]>;

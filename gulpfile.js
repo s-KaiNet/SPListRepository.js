@@ -93,5 +93,5 @@ gulp.task("build", function() {
 });
 
 gulp.task("watch", function () {
-	gulp.watch(["ts/**/*.ts"], "build");
+	gulp.watch(["ts/**/*.ts"], ["build"]);
 });

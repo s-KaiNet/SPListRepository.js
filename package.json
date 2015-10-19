@@ -1,7 +1,7 @@
 {
   "name": "sp-list-repository",
   "description": "Repository pattern implementation for convenient list data access through the SharePoint JavaScript client object model.",
-  "version": "2.0.6",
+  "version": "2.0.8",
   "author": {
     "name": "s-KaiNet",
     "url": "https://github.com/s-KaiNet"

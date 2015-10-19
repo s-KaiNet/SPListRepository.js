@@ -7,7 +7,7 @@ Install-Package SPListRepository.js
 ```
 ###Bower:
 ```
-bower install SPListRepository.js
+bower install sp-list-repository
 ```  
 
 ###Development: 

@@ -9,12 +9,6 @@ namespace SPListRepo{
 		static getListByUrl(listUrl: string):JQueryPromise<SP.List>{			
 			var loadDeferred = $.Deferred<SP.List>();
 			
-			var webAbsoluteUrl = Helper.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
-			var webServerRelativeUrl = Helper.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
-			var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
-			
-			var context = SP.ClientContext.get_current();
-			
 			var success = function(list:SP.List){
 				loadDeferred.resolve(list);			
 			};
@@ -23,17 +17,28 @@ namespace SPListRepo{
 				loadDeferred.reject(err);
 			};
 			
-			if((<any>(context.get_web())).getList){ //Post Feb.2015 CU - getList() availiable
-				var list = (<any>(context.get_web())).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl)); 
-				context.load(list, "Title", "RootFolder", "Id");
-				context.executeQueryAsync(function(){
-					success(list);
-				}, function(sender, err) { 
+			var context = SP.ClientContext.get_current();
+			var web = context.get_web();
+			context.load(web, "Url", "ServerRelativeUrl");
+			context.executeQueryAsync(() => {
+				var webAbsoluteUrl = Helper.ensureTrailingSlash(web.get_url());
+				var webServerRelativeUrl = Helper.ensureTrailingSlash(web.get_serverRelativeUrl());
+				var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
+
+				if((<any>(context.get_web())).getList){ //Post Feb.2015 CU - getList() availiable
+					var list = (<any>(context.get_web())).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl)); 
+					context.load(list, "Title", "RootFolder", "Id");
+					context.executeQueryAsync(function(){
+						success(list);
+					}, function(sender, err) { 
+						error(new RequestError(err));
+					});
+				}else{						//Pre Feb.2015 CU - getList missing
+					ListService.getListUsingRest(url, success, error);
+				}			
+				}, (sender, err) => {
 					error(new RequestError(err));
-				});
-			}else{						//Pre Feb.2015 CU - getList missing
-				ListService.getListUsingRest(url, success, error);
-			}			
+			});			
 			
 			return loadDeferred.promise();
 		}

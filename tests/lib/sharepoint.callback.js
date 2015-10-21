@@ -1,9 +1,10 @@
 module.exports = function(page, options, next){
 	var siteUrl = options.siteUrl;
-	var isOnPrem = (urlparse(siteUrl)).host.indexOf(".sharepoint.com") === -1;
+	var isOnPrem = siteUrl.indexOf(".sharepoint.com") === -1;
 	if(isOnPrem){
-		page.settings.userName = options.username;
-		page.settings.password  = options.password;
+		page.customHeaders = {
+			"Authorization": "Basic " + btoa(options.username + ":" + options.password)
+		};
 		page.open(siteUrl);
 	} else{
 		page.evaluate(function(creds) {

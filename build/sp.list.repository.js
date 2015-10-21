@@ -96,27 +96,33 @@ var SPListRepo;
         }
         ListService.getListByUrl = function(listUrl) {
             var loadDeferred = $.Deferred();
-            var webAbsoluteUrl = SPListRepo.Helper.ensureTrailingSlash(_spPageContextInfo.webAbsoluteUrl);
-            var webServerRelativeUrl = SPListRepo.Helper.ensureTrailingSlash(_spPageContextInfo.webServerRelativeUrl);
-            var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
-            var context = SP.ClientContext.get_current();
             var success = function(list) {
                 loadDeferred.resolve(list);
             };
             var error = function(err) {
                 loadDeferred.reject(err);
             };
-            if ((context.get_web()).getList) {
-                var list = (context.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
-                context.load(list, "Title", "RootFolder", "Id");
-                context.executeQueryAsync(function() {
-                    success(list);
-                }, function(sender, err) {
-                    error(new SPListRepo.RequestError(err));
-                });
-            } else {
-                ListService.getListUsingRest(url, success, error);
-            }
+            var context = SP.ClientContext.get_current();
+            var web = context.get_web();
+            context.load(web, "Url", "ServerRelativeUrl");
+            context.executeQueryAsync(function() {
+                var webAbsoluteUrl = SPListRepo.Helper.ensureTrailingSlash(web.get_url());
+                var webServerRelativeUrl = SPListRepo.Helper.ensureTrailingSlash(web.get_serverRelativeUrl());
+                var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
+                if ((context.get_web()).getList) {
+                    var list = (context.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
+                    context.load(list, "Title", "RootFolder", "Id");
+                    context.executeQueryAsync(function() {
+                        success(list);
+                    }, function(sender, err) {
+                        error(new SPListRepo.RequestError(err));
+                    });
+                } else {
+                    ListService.getListUsingRest(url, success, error);
+                }
+            }, function(sender, err) {
+                error(new SPListRepo.RequestError(err));
+            });
             return loadDeferred.promise();
         };
         ListService.getListById = function(id) {

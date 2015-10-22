@@ -308,8 +308,6 @@ namespace SPListRepo{
 		
 		protected _getSPCamlQuery(viewXmlObject: CamlBuilder.IFinalizable): SP.CamlQuery{
 			var viewQuery = viewXmlObject.ToString();
-			console.log("Running query:");
-			console.log(viewQuery);
 			var query = new SP.CamlQuery();
 			query.set_viewXml(viewQuery);			
 			return query;

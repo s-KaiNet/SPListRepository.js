@@ -6,7 +6,7 @@ namespace SPListRepo{
 	export class ListService{
 		private $ = jQuery;
 
-		static getListByUrl(listUrl: string):JQueryPromise<SP.List>{			
+		static getListByUrl(listUrl: string):JQueryPromise<SP.List>{		
 			var loadDeferred = $.Deferred<SP.List>();
 			
 			var success = function(list:SP.List){

@@ -163,8 +163,8 @@ namespace SPListRepo{
 				for (var i = 0; i < content.length; i++) {
 					fileCreateInfo.get_content().append(content.charCodeAt(i));
 				}
-				
-				var newFile = this._context.get_web().getFolderByServerRelativeUrl(this._getFolderRelativeUrl()).get_files().add(fileCreateInfo);
+								
+				var newFile = this._list.get_parentWeb().getFolderByServerRelativeUrl(this._getFolderRelativeUrl()).get_files().add(fileCreateInfo);
 				this._context.load(newFile);
 				
 				this._context.executeQueryAsync(() => {

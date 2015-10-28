@@ -26,7 +26,7 @@ class TestCategoryRepo extends SPListRepo.ListRepository<MyApp.TestCategoriesBas
 }
 
 SP.SOD.executeOrDelayUntilScriptLoaded(() =>{
-	describe("Test SPListRepository", () => {		
+	describe("Test SPListRepository", () => {
 		var testLibRepo = new TestLibRepo();
 		var testCategoryRepo = new TestCategoryRepo();
 		

@@ -89,7 +89,7 @@ var SPListRepo;
         function ListService() {
             this.$ = jQuery;
         }
-        ListService.getListByUrl = function(listUrl) {
+        ListService.getListByUrl = function(listUrl, hostWebUrl) {
             var loadDeferred = $.Deferred();
             var success = function(list) {
                 loadDeferred.resolve(list);
@@ -98,14 +98,28 @@ var SPListRepo;
                 loadDeferred.reject(err);
             };
             var context = SP.ClientContext.get_current();
+            var hostContext;
+            var hostWeb = null;
+            if (hostWebUrl) {
+                hostContext = new SP.AppContextSite(context, hostWebUrl);
+                hostWeb = hostContext.get_web();
+                context.load(hostWeb, "Url", "ServerRelativeUrl");
+            } else {
+                hostContext = context;
+            }
             var web = context.get_web();
             context.load(web, "Url", "ServerRelativeUrl");
             context.executeQueryAsync(function() {
                 var webAbsoluteUrl = SPListRepo.Helper.ensureTrailingSlash(web.get_url());
-                var webServerRelativeUrl = SPListRepo.Helper.ensureTrailingSlash(web.get_serverRelativeUrl());
-                var url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
-                if ((context.get_web()).getList) {
-                    var list = (context.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
+                var webServerRelativeUrl = hostWebUrl ? SPListRepo.Helper.ensureTrailingSlash(hostWeb.get_serverRelativeUrl()) : SPListRepo.Helper.ensureTrailingSlash(web.get_serverRelativeUrl());
+                var url = "";
+                if (hostWebUrl) {
+                    url = String.format("{0}_api/SP.AppContextSite(@target)/web/lists/?@target='{3}'&$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl, hostWebUrl);
+                } else {
+                    url = String.format("{0}_api/web/lists/?$expand=RootFolder&$filter=RootFolder/ServerRelativeUrl eq '{1}{2}'&$select=ID", webAbsoluteUrl, webServerRelativeUrl, listUrl);
+                }
+                if ((hostContext.get_web()).getList) {
+                    var list = (hostContext.get_web()).getList(String.format("{0}{1}", webServerRelativeUrl, listUrl));
                     context.load(list, "Title", "RootFolder", "Id");
                     context.executeQueryAsync(function() {
                         success(list);
@@ -113,17 +127,23 @@ var SPListRepo;
                         error(new SPListRepo.RequestError(err));
                     });
                 } else {
-                    ListService.getListUsingRest(url, success, error);
+                    ListService.getListUsingRest(url, success, error, hostWebUrl);
                 }
             }, function(sender, err) {
                 error(new SPListRepo.RequestError(err));
             });
             return loadDeferred.promise();
         };
-        ListService.getListById = function(id) {
+        ListService.getListById = function(id, hostWebUrl) {
             var loadDeferred = $.Deferred();
             var context = SP.ClientContext.get_current();
-            var list = context.get_web().get_lists().getById(id);
+            var hostContext;
+            if (hostWebUrl) {
+                hostContext = new SP.AppContextSite(context, hostWebUrl);
+            } else {
+                hostContext = context;
+            }
+            var list = hostContext.get_web().get_lists().getById(id);
             context.load(list, "Title", "RootFolder", "Id");
             context.executeQueryAsync(function() {
                 loadDeferred.resolve(list);
@@ -132,7 +152,7 @@ var SPListRepo;
             });
             return loadDeferred.promise();
         };
-        ListService.getListUsingRest = function(url, success, error) {
+        ListService.getListUsingRest = function(url, success, error, hostWebUrl) {
             $.ajax({
                 url: url,
                 type: "GET",
@@ -142,7 +162,13 @@ var SPListRepo;
                 },
                 success: function(data) {
                     var context = SP.ClientContext.get_current();
-                    var list = context.get_web().get_lists().getById(data.d.results[0].Id);
+                    var hostContext;
+                    if (hostWebUrl) {
+                        hostContext = new SP.AppContextSite(context, hostWebUrl);
+                    } else {
+                        hostContext = context;
+                    }
+                    var list = hostContext.get_web().get_lists().getById(data.d.results[0].Id);
                     context.load(list, "Title", "RootFolder", "Id");
                     context.executeQueryAsync(function() {
                         success(list);
@@ -197,6 +223,9 @@ var SPListRepo;
             this.dfd.promise.finally(cb);
             return this;
         };
+        ngPromise.prototype.getUnderlyingPromise = function() {
+            return this.dfd.promise;
+        };
         return ngPromise;
     })();
     SPListRepo.ngPromise = ngPromise;
@@ -224,6 +253,9 @@ var SPListRepo;
             this.dfd.promise().always(cb);
             return this;
         };
+        jQPromise.prototype.getUnderlyingPromise = function() {
+            return this.dfd.promise();
+        };
         return jQPromise;
     })();
     SPListRepo.jQPromise = jQPromise;
@@ -250,6 +282,9 @@ var SPListRepo;
         QPromise.prototype.always = function(cb) {
             this.dfd.promise.finally(cb);
             return this;
+        };
+        QPromise.prototype.getUnderlyingPromise = function() {
+            return this.dfd.promise;
         };
         return QPromise;
     })();
@@ -489,7 +524,7 @@ var SPListRepo;
                 for (var i = 0; i < content.length; i++) {
                     fileCreateInfo.get_content().append(content.charCodeAt(i));
                 }
-                var newFile = _this._context.get_web().getFolderByServerRelativeUrl(_this._getFolderRelativeUrl()).get_files().add(fileCreateInfo);
+                var newFile = _this._list.get_parentWeb().getFolderByServerRelativeUrl(_this._getFolderRelativeUrl()).get_files().add(fileCreateInfo);
                 _this._context.load(newFile);
                 _this._context.executeQueryAsync(function() {
                     deferred.resolve(newFile);

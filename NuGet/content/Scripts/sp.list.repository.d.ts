@@ -45,9 +45,9 @@ declare namespace SPListRepo {
 declare namespace SPListRepo {
     class ListService {
         private $;
-        static getListByUrl(listUrl: string): JQueryPromise<SP.List>;
-        static getListById(id: SP.Guid): JQueryPromise<SP.List>;
-        private static getListUsingRest(url, success, error);
+        static getListByUrl(listUrl: string, hostWebUrl?: string): JQueryPromise<SP.List>;
+        static getListById(id: SP.Guid, hostWebUrl?: string): JQueryPromise<SP.List>;
+        private static getListUsingRest(url, success, error, hostWebUrl?);
     }
 }
 declare namespace SPListRepo {
@@ -64,6 +64,7 @@ declare namespace SPListRepo {
         done(cb: (data?: T) => any): IPromise<T>;
         fail(cb: (reason?: any) => any): IPromise<T>;
         always(cb: () => any): IPromise<T>;
+        getUnderlyingPromise(): any;
     }
 }
 declare namespace SPListRepo {
@@ -81,6 +82,7 @@ declare namespace SPListRepo {
         fail(cb: (reason?: any) => any): IPromise<T>;
         then(success: (data?: T) => any, error: (reason?: any) => any): IPromise<T>;
         always(cb: () => any): IPromise<T>;
+        getUnderlyingPromise(): any;
     }
 }
 declare namespace SPListRepo {
@@ -91,6 +93,7 @@ declare namespace SPListRepo {
         fail(cb: (reason?: any) => any): IPromise<T>;
         then(success: (data?: T) => any, error: (reason?: any) => any): IPromise<T>;
         always(cb: () => any): IPromise<T>;
+        getUnderlyingPromise(): any;
     }
 }
 declare namespace SPListRepo {
@@ -101,6 +104,7 @@ declare namespace SPListRepo {
         fail(cb: (reason?: any) => any): IPromise<T>;
         then(success: (data?: T) => any, error: (reason?: any) => any): IPromise<T>;
         always(cb: () => any): IPromise<T>;
+        getUnderlyingPromise(): any;
     }
 }
 declare namespace SPListRepo {

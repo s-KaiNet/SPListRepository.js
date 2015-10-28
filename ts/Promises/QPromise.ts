@@ -28,6 +28,10 @@ namespace SPListRepo{
 			this.dfd.promise.finally(cb);
 			
 			return this;
-		}		
+		}
+		
+		getUnderlyingPromise(): any{
+			return this.dfd.promise;
+		}	
 	}
 }

@@ -6,5 +6,7 @@ namespace SPListRepo{
 		done(cb: (data?: T) => any): IPromise<T>;
 		fail(cb: (reason?: any) => any): IPromise<T>;
 		always(cb: () => any): IPromise<T>;
+		
+		getUnderlyingPromise(): any;
 	}
 }

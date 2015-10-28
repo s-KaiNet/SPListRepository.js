@@ -11,19 +11,15 @@ var gulp = require("gulp"),
 	
 var sett = require("./settings");
 
-var jsSrc = ["js/Helpers.js",
-			"js/Constants.js", 
-			"js/RequestError.js",
-			"js/QuerySettings.js",
-			"js/ListService.js",
-			"js/ViewScope.js",
-			"js/BaseListItem.js",
-			"js/ListRepository.js"];
-
 gulp.task("js-dev", function () {
-	return gulp.src(jsSrc)
+	return gulp.src("ts/_references.ts")
+		.pipe($.ts({
+			target: "ES5",
+			declaration: false,
+			outFile: "sp.list.repository.js"
+		}))
+		.js
 		.pipe($.jsbeautifier({mode: "VERIFY_AND_WRITE"}))
-		.pipe($.concat("sp.list.repository.js"))
 		.pipe(gulp.dest("./build"))
 		.pipe($.rename({ suffix: ".min" }))
 		.pipe($.uglify())
@@ -39,16 +35,6 @@ gulp.task("ts-def", function(){
 			}));
 
 		return tsResult.dts.pipe(gulp.dest("./build"));
-});
-
-gulp.task("ts", function(){
-	return gulp.src("ts/**/*.ts")
-		.pipe($.ts({
-			target: "ES5",
-			declaration: false
-		}))
-		.js
-		.pipe(gulp.dest("./js"));
 });
 
 gulp.task("ts-tests", function(){
@@ -89,7 +75,7 @@ gulp.task("nuget", function(){
 });
 
 gulp.task("build", function() {
-	runSequence("ts", "js-dev", ["ts-def", "spsave"], "nuget");
+	runSequence("js-dev", ["ts-def", "spsave"], "nuget");
 });
 
 gulp.task("watch", function () {

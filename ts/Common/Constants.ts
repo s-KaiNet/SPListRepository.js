@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../_references.ts" />
 
 Type.registerNamespace("SPListRepo.Fields");
 Type.registerNamespace("SPListRepo.ErrorCodes");

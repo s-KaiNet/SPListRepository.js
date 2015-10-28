@@ -1,6 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
-/// <reference path="Constants.ts" />
+/// <reference path="../_references.ts" />
 
 namespace SPListRepo{
 	export class BaseListItem{

@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../_references.ts" />
 
 //https://msdn.microsoft.com/en-us/library/dd923822%28v=office.12%29.aspx
 namespace SPListRepo{

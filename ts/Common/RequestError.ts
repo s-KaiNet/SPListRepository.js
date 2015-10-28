@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../_references.ts" />
 
 namespace SPListRepo{
 	export class RequestError {

@@ -1,27 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
-Type.registerNamespace("SPListRepo");
-var SPListRepo;
-(function(SPListRepo) {
-    var Helper = (function() {
-        function Helper() {}
-        Helper.ensureTrailingSlash = function(url) {
-            if (!url.endsWith("/")) {
-                return url + "/";
-            }
-            return url;
-        };
-        Helper.ensureLeadingSlash = function(url) {
-            if (!(url.substr(0, 1) === "/")) {
-                return "/" + url;
-            }
-            return url;
-        };
-        return Helper;
-    })();
-    SPListRepo.Helper = Helper;
-})(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../_references.ts" />
 Type.registerNamespace("SPListRepo.Fields");
 Type.registerNamespace("SPListRepo.ErrorCodes");
 var SPListRepo;
@@ -48,8 +25,29 @@ var SPListRepo;
         ErrorCodes.IllegalName = -2130575245;
     })(ErrorCodes = SPListRepo.ErrorCodes || (SPListRepo.ErrorCodes = {}));
 })(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../_references.ts" />
+Type.registerNamespace("SPListRepo");
+var SPListRepo;
+(function(SPListRepo) {
+    var Helper = (function() {
+        function Helper() {}
+        Helper.ensureTrailingSlash = function(url) {
+            if (!url.endsWith("/")) {
+                return url + "/";
+            }
+            return url;
+        };
+        Helper.ensureLeadingSlash = function(url) {
+            if (!(url.substr(0, 1) === "/")) {
+                return "/" + url;
+            }
+            return url;
+        };
+        return Helper;
+    })();
+    SPListRepo.Helper = Helper;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function(SPListRepo) {
     var RequestError = (function() {
@@ -69,25 +67,22 @@ var SPListRepo;
     })();
     SPListRepo.RequestError = RequestError;
 })(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
+/// <reference path="../_references.ts" />
+//https://msdn.microsoft.com/en-us/library/dd923822%28v=office.12%29.aspx
 var SPListRepo;
 (function(SPListRepo) {
-    var QuerySettings = (function() {
-        function QuerySettings(viewScope, viewFields, rowLimit) {
-            this.viewScope = viewScope;
-            this.viewFields = viewFields;
-            this.rowLimit = rowLimit;
-        }
-        return QuerySettings;
-    })();
-    SPListRepo.QuerySettings = QuerySettings;
+    (function(ViewScope) {
+        ViewScope[ViewScope["FilesOnly"] = 0] = "FilesOnly";
+        ViewScope[ViewScope["FoldersOnly"] = 1] = "FoldersOnly";
+        ViewScope[ViewScope["FilesFolders"] = 2] = "FilesFolders";
+        ViewScope[ViewScope["FilesOnlyRecursive"] = 3] = "FilesOnlyRecursive";
+        ViewScope[ViewScope["FoldersOnlyRecursive"] = 4] = "FoldersOnlyRecursive";
+        ViewScope[ViewScope["FilesFoldersRecursive"] = 5] = "FilesFoldersRecursive"; //Shows all files(items) AND folders in the specified folder or any folder descending from it (<View Scope="RecursiveAll")
+    })(SPListRepo.ViewScope || (SPListRepo.ViewScope = {}));
+    var ViewScope = SPListRepo.ViewScope;
 })(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="RequestError.ts" />
-/// <reference path="Helpers.ts" />
+Type.registerNamespace("SPListRepo.ViewScope");
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function(SPListRepo) {
     var ListService = (function() {
@@ -164,26 +159,164 @@ var SPListRepo;
     })();
     SPListRepo.ListService = ListService;
 })(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
-//https://msdn.microsoft.com/en-us/library/dd923822%28v=office.12%29.aspx
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function(SPListRepo) {
-    (function(ViewScope) {
-        ViewScope[ViewScope["FilesOnly"] = 0] = "FilesOnly";
-        ViewScope[ViewScope["FoldersOnly"] = 1] = "FoldersOnly";
-        ViewScope[ViewScope["FilesFolders"] = 2] = "FilesFolders";
-        ViewScope[ViewScope["FilesOnlyRecursive"] = 3] = "FilesOnlyRecursive";
-        ViewScope[ViewScope["FoldersOnlyRecursive"] = 4] = "FoldersOnlyRecursive";
-        ViewScope[ViewScope["FilesFoldersRecursive"] = 5] = "FilesFoldersRecursive"; //Shows all files(items) AND folders in the specified folder or any folder descending from it (<View Scope="RecursiveAll")
-    })(SPListRepo.ViewScope || (SPListRepo.ViewScope = {}));
-    var ViewScope = SPListRepo.ViewScope;
+    var QuerySettings = (function() {
+        function QuerySettings(viewScope, viewFields, rowLimit) {
+            this.viewScope = viewScope;
+            this.viewFields = viewFields;
+            this.rowLimit = rowLimit;
+        }
+        return QuerySettings;
+    })();
+    SPListRepo.QuerySettings = QuerySettings;
 })(SPListRepo || (SPListRepo = {}));
-Type.registerNamespace("SPListRepo.ViewScope");
-
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
-/// <reference path="Constants.ts" />
+/// <reference path="../_references.ts" />
+/// <reference path="../_references.ts" />
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var ngPromise = (function() {
+        function ngPromise(dfd) {
+            this.dfd = dfd;
+        }
+        ngPromise.prototype.done = function(cb) {
+            this.dfd.promise.then(cb);
+            return this;
+        };
+        ngPromise.prototype.fail = function(cb) {
+            this.dfd.promise.catch(cb);
+            return this;
+        };
+        ngPromise.prototype.then = function(success, error) {
+            this.dfd.promise.then(success, error);
+            return this;
+        };
+        ngPromise.prototype.always = function(cb) {
+            this.dfd.promise.finally(cb);
+            return this;
+        };
+        return ngPromise;
+    })();
+    SPListRepo.ngPromise = ngPromise;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var jQPromise = (function() {
+        function jQPromise(dfd) {
+            this.dfd = dfd;
+        }
+        jQPromise.prototype.done = function(cb) {
+            this.dfd.promise().done(cb);
+            return this;
+        };
+        jQPromise.prototype.fail = function(cb) {
+            this.dfd.promise().fail(cb);
+            return this;
+        };
+        jQPromise.prototype.then = function(success, error) {
+            this.dfd.promise().then(success, error);
+            return this;
+        };
+        jQPromise.prototype.always = function(cb) {
+            this.dfd.promise().always(cb);
+            return this;
+        };
+        return jQPromise;
+    })();
+    SPListRepo.jQPromise = jQPromise;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var QPromise = (function() {
+        function QPromise(dfd) {
+            this.dfd = dfd;
+        }
+        QPromise.prototype.done = function(cb) {
+            this.dfd.promise.done(cb);
+            return this;
+        };
+        QPromise.prototype.fail = function(cb) {
+            this.dfd.promise.catch(cb);
+            return this;
+        };
+        QPromise.prototype.then = function(success, error) {
+            this.dfd.promise.then(success, error);
+            return this;
+        };
+        QPromise.prototype.always = function(cb) {
+            this.dfd.promise.finally(cb);
+            return this;
+        };
+        return QPromise;
+    })();
+    SPListRepo.QPromise = QPromise;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var ngDeferred = (function() {
+        function ngDeferred() {
+            var $q = angular.injector(["ng"]).get("$q");
+            this.dfd = $q.defer();
+        }
+        ngDeferred.prototype.promise = function() {
+            return new SPListRepo.ngPromise(this.dfd);
+        };
+        ngDeferred.prototype.resolve = function(data) {
+            return this.dfd.resolve(data);
+        };
+        ngDeferred.prototype.reject = function() {
+            return this.dfd.reject();
+        };
+        return ngDeferred;
+    })();
+    SPListRepo.ngDeferred = ngDeferred;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var jQDeferred = (function() {
+        function jQDeferred() {
+            this.dfd = jQuery.Deferred();
+        }
+        jQDeferred.prototype.promise = function() {
+            return new SPListRepo.jQPromise(this.dfd);
+        };
+        jQDeferred.prototype.resolve = function(data) {
+            return this.dfd.resolve(data);
+        };
+        jQDeferred.prototype.reject = function(reason) {
+            return this.dfd.reject(reason);
+        };
+        return jQDeferred;
+    })();
+    SPListRepo.jQDeferred = jQDeferred;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
+var SPListRepo;
+(function(SPListRepo) {
+    var QDeferred = (function() {
+        function QDeferred() {
+            this.dfd = Q.defer();
+        }
+        QDeferred.prototype.promise = function() {
+            return new SPListRepo.QPromise(this.dfd);
+        };
+        QDeferred.prototype.resolve = function(data) {
+            return this.dfd.resolve(data);
+        };
+        QDeferred.prototype.reject = function(reason) {
+            return this.dfd.reject(reason);
+        };
+        return QDeferred;
+    })();
+    SPListRepo.QDeferred = QDeferred;
+})(SPListRepo || (SPListRepo = {}));
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function(SPListRepo) {
     var BaseListItem = (function() {
@@ -225,13 +358,7 @@ var SPListRepo;
     })();
     SPListRepo.BaseListItem = BaseListItem;
 })(SPListRepo || (SPListRepo = {}));
-
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
-/// <reference path="Constants.ts" />
-/// <reference path="ListService.ts" />
-/// <reference path="BaseListItem.ts" />
-/// <reference path="QuerySettings.ts" />
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function(SPListRepo) {
     var ListRepository = (function() {
@@ -506,7 +633,7 @@ var SPListRepo;
             return String.format("{0}{1}", listRootUrl, folder);
         };
         ListRepository.prototype._createDeferred = function() {
-            return jQuery.Deferred();
+            return new SPListRepo.jQDeferred();
         };
         ListRepository.prototype._withPromise = function(callback) {
             var deferred = this._createDeferred();
@@ -519,3 +646,20 @@ var SPListRepo;
     })();
     SPListRepo.ListRepository = ListRepository;
 })(SPListRepo || (SPListRepo = {}));
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./Common/Constants.ts" />
+/// <reference path="./Common/Helpers.ts" />
+/// <reference path="./Common/RequestError.ts" />
+/// <reference path="./Common/ViewScope.ts" />
+/// <reference path="./Common/ListService.ts" />
+/// <reference path="./Common/QuerySettings.ts" />
+/// <reference path="./Interfaces/IPromise.ts" />
+/// <reference path="./Interfaces/IDeferred.ts" />
+/// <reference path="./Promises/ngPromise.ts" />
+/// <reference path="./Promises/jQPromise.ts" />
+/// <reference path="./Promises/QPromise.ts" />
+/// <reference path="./Promises/ngDeferred.ts" />
+/// <reference path="./Promises/jQDeferred.ts" />
+/// <reference path="./Promises/QDeferred.ts" />
+/// <reference path="./Base/BaseListItem.ts" />
+/// <reference path="./Base/ListRepository.ts" />

@@ -1,6 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="RequestError.ts" />
-/// <reference path="Helpers.ts" />
+/// <reference path="../_references.ts" />
 
 namespace SPListRepo{	
 	export class ListService{

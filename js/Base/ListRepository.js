@@ -1,10 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
-/// <reference path="Constants.ts" />
-/// <reference path="ListService.ts" />
-/// <reference path="BaseListItem.ts" />
-/// <reference path="QuerySettings.ts" />
-/// <reference path="Deferred.ts" />
+/// <reference path="../_references.ts" />
 var SPListRepo;
 (function (SPListRepo) {
     var ListRepository = (function () {

@@ -1,9 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="ViewScope.ts" />
-/// <reference path="Constants.ts" />
-/// <reference path="ListService.ts" />
-/// <reference path="BaseListItem.ts" />
-/// <reference path="QuerySettings.ts" />
+/// <reference path="../_references.ts" />
 
 namespace SPListRepo{
 	
@@ -39,11 +34,11 @@ namespace SPListRepo{
 			});
 		}
 		
-		getItems(querySettings?: QuerySettings): JQueryPromise<T[]>{
+		getItems(querySettings?: QuerySettings): IPromise<T[]>{
 			return this._getItemsByExpression(null, querySettings);
 		}
 		
-		getItemById(id: number): JQueryPromise<T>{
+		getItemById(id: number): IPromise<T>{
 			return this._withPromise<T>(deferred => {
 				
 				var item = this._list.getItemById(id);
@@ -58,19 +53,19 @@ namespace SPListRepo{
 			});
 		}
 		
-		getItemsByTitle(title: string, querySettings?: QuerySettings): JQueryPromise<T[]>{
+		getItemsByTitle(title: string, querySettings?: QuerySettings): IPromise<T[]>{
 			var camlExpression = CamlBuilder.Expression().TextField(Fields.Title).EqualTo(title);
 			
 			return this._getItemsByExpression(camlExpression, querySettings);
 		}
 		
-		getItemsByIds(ids: number[], querySettings?: QuerySettings): JQueryPromise<T[]>{
+		getItemsByIds(ids: number[], querySettings?: QuerySettings): IPromise<T[]>{
 			var camlExpression = CamlBuilder.Expression().CounterField(Fields.ID).In(ids);
 
 			return this._getItemsByExpression(camlExpression, querySettings);
 		}
 		
-		getItemsInsideFolders(folderNames: string[], querySettings?: QuerySettings): JQueryPromise<T[]>{
+		getItemsInsideFolders(folderNames: string[], querySettings?: QuerySettings): IPromise<T[]>{
 			var camlExpression = CamlBuilder.Expression().TextField(Fields.FileDirRef).In(folderNames.map(folderName => {
 				var folderRelUrl = this._getFolderRelativeUrl(folderName);
 				if (folderRelUrl.indexOf("/") === 0) {
@@ -83,7 +78,7 @@ namespace SPListRepo{
 			return this._getItemsByExpression(camlExpression, querySettings);
 		}
 		
-		getLastAddedItem(viewFields?: string[], recursive: boolean = false): JQueryPromise<T>{
+		getLastAddedItem(viewFields?: string[], recursive: boolean = false): IPromise<T>{
 			var camlExpression = CamlBuilder.Expression().CounterField(Fields.ID).NotEqualTo(0);			
 			var querySettings: QuerySettings;
 			
@@ -98,7 +93,7 @@ namespace SPListRepo{
 			return this._getItemBySPCamlQuery(query);
 		}
 		
-		getLastModifiedItem(viewFields?: string[], recursive: boolean = false): JQueryPromise<T>{
+		getLastModifiedItem(viewFields?: string[], recursive: boolean = false): IPromise<T>{
 			var camlExpression = CamlBuilder.Expression().CounterField(Fields.ID).NotEqualTo(0);			
 			var querySettings: QuerySettings;
 			
@@ -113,7 +108,7 @@ namespace SPListRepo{
 			return this._getItemBySPCamlQuery(query);
 		}
 		
-		saveItem(model: T) : JQueryPromise<T>{
+		saveItem(model: T) : IPromise<T>{
 			if (!model.id || model.id < 1) {
 				return this._addItem(model);
 			}
@@ -121,7 +116,7 @@ namespace SPListRepo{
 			return this._updateItem(model);
 		}
 		
-		deleteItem(model: T) : JQueryPromise<T>{
+		deleteItem(model: T) : IPromise<T>{
 			return this._withPromise<T>(deferred => {
 				
 				var item = this._list.getItemById(model.id);
@@ -137,7 +132,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		createFolder(folderName: string): JQueryPromise<T>{
+		createFolder(folderName: string): IPromise<T>{
 			return this._withPromise<T>(deferred => {
 				
 				var folder = new SP.ListItemCreationInformation();
@@ -157,7 +152,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		createFile(url: string, content: string, overwrite: boolean): JQueryPromise<SP.File>{
+		createFile(url: string, content: string, overwrite: boolean): IPromise<SP.File>{
 			return this._withPromise<SP.File>(deferred => {
 				var fileCreateInfo = new SP.FileCreationInformation();
 				
@@ -180,7 +175,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		protected _getItemBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T>{
+		protected _getItemBySPCamlQuery(spCamlQuery: SP.CamlQuery): IPromise<T>{
 			var deferred = this._createDeferred();
 
 			this._getItemsBySPCamlQuery(spCamlQuery)
@@ -196,7 +191,7 @@ namespace SPListRepo{
 			return deferred.promise();
 		}
 		
-		protected _addItem(model: T): JQueryPromise<T>{
+		protected _addItem(model: T): IPromise<T>{
 			return this._withPromise<T>(deferred => {
 			
 			var itemCreateInfo = new SP.ListItemCreationInformation();
@@ -221,7 +216,7 @@ namespace SPListRepo{
 			});
 		}
 		
-		protected _updateItem(model: T): JQueryPromise<T>{
+		protected _updateItem(model: T): IPromise<T>{
 			return this._withPromise<T>(deferred => {
 				
 				var item = this._list.getItemById(model.id);
@@ -243,7 +238,7 @@ namespace SPListRepo{
 		}
 		
 		//NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
-		protected _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : JQueryPromise<T[]>{
+		protected _getItemsByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : IPromise<T[]>{
 			querySettings = querySettings || new QuerySettings(ViewScope.FilesFolders);
 			
 			var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));
@@ -252,7 +247,7 @@ namespace SPListRepo{
 		}
 		
 		//NOTE: camlExpression - all that can lay out inside <Where></Where> tags in CAML query. For example <OrderBy> is not allowed, because it is outside the <Where>
-		protected _getItemByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : JQueryPromise<T>{
+		protected _getItemByExpression(camlExpression: CamlBuilder.IExpression, querySettings?: QuerySettings) : IPromise<T>{
 			querySettings = querySettings || new QuerySettings(ViewScope.FilesFolders);
 			
 			var camlQuery = this._getSPCamlQuery(this._getViewQuery(camlExpression, querySettings));
@@ -313,7 +308,7 @@ namespace SPListRepo{
 			return query;
 		}
 		
-		protected _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): JQueryPromise<T[]>{
+		protected _getItemsBySPCamlQuery(spCamlQuery: SP.CamlQuery): IPromise<T[]>{
 			return this._withPromise<T[]>(deferred => {
 				if (this.folder) {
 					spCamlQuery.set_folderServerRelativeUrl(this._getFolderRelativeUrl());
@@ -348,12 +343,12 @@ namespace SPListRepo{
 			return String.format("{0}{1}", listRootUrl, folder);
 		}
 		
-		protected _createDeferred<T>(){
-			return jQuery.Deferred<T>();
+		protected _createDeferred<T>(): IDeferred<T>{
+			return new jQDeferred<T>();
 		}
 		
-		protected _withPromise<U>(callback: (deferred: JQueryDeferred<U>) => void): JQueryPromise<U>{
-			var deferred = this._createDeferred<U>();
+		protected _withPromise<T>(callback: (deferred: IDeferred<T>) => void): IPromise<T>{
+			var deferred = this._createDeferred<T>();
 			this._loadListDeferred.done(() => {				
 				callback(deferred);
 			});

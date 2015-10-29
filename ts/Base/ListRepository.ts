@@ -14,16 +14,16 @@ namespace SPListRepo{
 		
 		folder: string;
 		
-		constructor(listUrlOrId: string|SP.Guid, listItemConstructor: IBaseItemConstruct<T>){
+		constructor(listUrlOrId: string|SP.Guid, listItemConstructor: IBaseItemConstruct<T>, hostUrl?: string){
 			
 			this._listItemConstructor = listItemConstructor;
 			this._context = SP.ClientContext.get_current();
 			
 			if(listUrlOrId instanceof SP.Guid){
-				this._loadListDeferred = ListService.getListById(listUrlOrId);
+				this._loadListDeferred = ListService.getListById(listUrlOrId, hostUrl);
 				
 			}else if(typeof listUrlOrId === "string"){
-				this._loadListDeferred = ListService.getListByUrl(listUrlOrId);
+				this._loadListDeferred = ListService.getListByUrl(listUrlOrId, hostUrl);
 			}
 			
 			this._loadListDeferred.done((list) => {

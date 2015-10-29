@@ -164,7 +164,7 @@ declare namespace SPListRepo {
         protected _list: SP.List;
         protected _listItemConstructor: IBaseItemConstruct<T>;
         folder: string;
-        constructor(listUrlOrId: string | SP.Guid, listItemConstructor: IBaseItemConstruct<T>);
+        constructor(listUrlOrId: string | SP.Guid, listItemConstructor: IBaseItemConstruct<T>, hostUrl?: string);
         getItems(querySettings?: QuerySettings): IPromise<T[]>;
         getItemById(id: number): IPromise<T>;
         getItemsByTitle(title: string, querySettings?: QuerySettings): IPromise<T[]>;

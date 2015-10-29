@@ -397,14 +397,14 @@ var SPListRepo;
 var SPListRepo;
 (function(SPListRepo) {
     var ListRepository = (function() {
-        function ListRepository(listUrlOrId, listItemConstructor) {
+        function ListRepository(listUrlOrId, listItemConstructor, hostUrl) {
             var _this = this;
             this._listItemConstructor = listItemConstructor;
             this._context = SP.ClientContext.get_current();
             if (listUrlOrId instanceof SP.Guid) {
-                this._loadListDeferred = SPListRepo.ListService.getListById(listUrlOrId);
+                this._loadListDeferred = SPListRepo.ListService.getListById(listUrlOrId, hostUrl);
             } else if (typeof listUrlOrId === "string") {
-                this._loadListDeferred = SPListRepo.ListService.getListByUrl(listUrlOrId);
+                this._loadListDeferred = SPListRepo.ListService.getListByUrl(listUrlOrId, hostUrl);
             }
             this._loadListDeferred.done(function(list) {
                     _this._list = list;
